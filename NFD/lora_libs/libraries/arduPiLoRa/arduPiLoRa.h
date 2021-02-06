@@ -42,6 +42,15 @@
  *****************************************************************************/
 
 #define SX1272_debug_mode 1
+// added by C. Pham
+#define W_REQUESTED_ACK
+//#define W_NET_KEY
+//#define W_INITIALIZATION
+#define SX1272_RST  7
+
+#define SX1272Chip  0
+#define SX1276Chip  1
+// end
 
 #define SX1272_SS 10
 
@@ -1061,6 +1070,42 @@ public:
 	*/
 	uint8_t getTemp();
 
+// added by C. Pham
+    void setPacketType(uint8_t type);
+    void RxChainCalibration();
+    uint8_t doCAD(uint8_t counter);
+    uint16_t getToA(uint8_t pl);
+    void CarrierSense();
+    int8_t setSyncWord(uint8_t sw);
+    int8_t getSyncWord();
+
+    // SX1272 or SX1276?
+    uint8_t _board;
+    uint8_t _syncWord;
+    uint8_t _defaultSyncWord;
+    unsigned long _starttime;
+    unsigned long _stoptime;
+    unsigned long _startDoCad;
+    unsigned long _endDoCad;
+    uint8_t _loraMode;
+    uint8_t _send_cad_number;
+    bool _extendedIFS;
+    bool _RSSIonSend;
+    bool _enableCarrierSense;
+    bool _rawFormat;
+    int8_t _rcv_snr_in_ack;
+
+#ifdef W_REQUESTED_ACK
+    uint8_t _requestACK;
+    uint8_t _requestACK_indicator;
+#endif
+
+#ifdef W_NET_KEY
+    uint8_t _my_netkey[NET_KEY_LENGTH];
+    uint8_t _the_net_key_0;
+    uint8_t _the_net_key_1;
+#endif
+    //end
 
 	/// Variables /////////////////////////////////////////////////////////////
 
