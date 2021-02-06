@@ -1,5 +1,5 @@
 /* 
- *  Library for LoRa 868 / 915MHz SX1272 LoRa module
+ *  Library for LoRa 868 / 915MHz sx1276 LoRa module
  *  
  *  Copyright (C) Libelium Comunicaciones Distribuidas S.L. 
  *  http://www.libelium.com 
@@ -41,9 +41,9 @@
  * Definitions & Declarations
  *****************************************************************************/
 
-#define SX1272_debug_mode 1
+#define sx1276_debug_mode 1
 
-#define SX1272_SS 10
+#define sx1276_SS 10
 
 #define LORA_RESET_PIN 1
 
@@ -294,12 +294,12 @@ struct pack
  * Class
  ******************************************************************************/
 
-//! SX1272 Class
+//! sx1276 Class
 /*!
-	SX1272 Class defines all the variables and functions used to manage
-	SX1272 modules.
+	sx1276 Class defines all the variables and functions used to manage
+	sx1276 modules.
  */
-class SX1272
+class sx1276
 {
 
 public:
@@ -310,7 +310,7 @@ public:
 	\param void
 	\return void
   	 */
-   	SX1272()
+   	sx1276()
     {
 		// Initialize class variables
 		_bandwidth = BW_125;
@@ -1257,6 +1257,6 @@ private:
 	char rxbuf[2];
 };
 
-extern SX1272	sx1272;
+extern sx1276	sx1276;
 
 #endif

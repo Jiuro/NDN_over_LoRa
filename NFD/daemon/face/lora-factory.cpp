@@ -126,35 +126,35 @@ LoRaFactory::doGetChannels() const
 void
 LoRaFactory::setup(){
   // Power ON the module
-  e = sx1272.ON();
+  e = sx1276.ON();
   
   //Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
-  e = sx1272.setCR(CR_5);
-  e = sx1272.setBW(BW_500);
-  e = sx1272.setSF(SF_7);
+  e = sx1276.setCR(CR_5);
+  e = sx1276.setBW(BW_500);
+  e = sx1276.setSF(SF_7);
 
   // Set header
-  e = sx1272.setHeaderON();
+  e = sx1276.setHeaderON();
 
   // Select frequency channel
-  e = sx1272.setChannel(CH_00_900);
+  e = sx1276.setChannel(CH_00_900);
 
   // Set CRC
-  e = sx1272.setCRC_ON();
+  e = sx1276.setCRC_ON();
 
   // Select output power (Max, High or Low)
-  e = sx1272.setPower('H');
+  e = sx1276.setPower('H');
 
   // Set the node address
-  e = sx1272.setNodeAddress(3);
+  e = sx1276.setNodeAddress(3);
 
   // Set the LoRa into receive mode by default
-  e = sx1272.receive();
+  e = sx1276.receive();
   if (e)
     NFD_LOG_INFO("Unable to enter receive mode");
 
   // Print a success message
-  NFD_LOG_INFO("SX1272 successfully configured");
+  NFD_LOG_INFO("sx1276 successfully configured");
   delay(1000);
 }
 
@@ -180,7 +180,7 @@ void *LoRaFactory::transmit_and_recieve()
           }
 
           // After sending enter recieve mode again
-          sx1272.receive();
+          sx1276.receive();
           pthread_mutex_unlock(&threadLock);
         }
         // Otherwise check and see if there is available data
@@ -190,7 +190,7 @@ void *LoRaFactory::transmit_and_recieve()
             pthread_mutex_unlock(&threadLock);
 
             // Check to see if the LoRa has received data... if so handle it
-            if (sx1272.checkForData()) {
+            if (sx1276.checkForData()) {
               handleRead();
             }
         }
@@ -247,11 +247,11 @@ LoRaFactory::sendPacket()
       uint8_t id = ids->first;
       
       // Set LoRa source to ID
-      if ((e = sx1272.setNodeAddress(id)) != 0) {
+      if ((e = sx1276.setNodeAddress(id)) != 0) {
         NFD_LOG_ERROR("Unable to set src ID to " << std::to_string(id));
       }
 
-      if ((e = sx1272.sendPacketTimeout(dst, cstr, bufSize)) != 0)
+      if ((e = sx1276.sendPacketTimeout(dst, cstr, bufSize)) != 0)
       {
         NFD_LOG_ERROR("Send operation failed: " + std::to_string(e));
       }
@@ -289,13 +289,13 @@ LoRaFactory::handleRead() {
   int i;
 
   while (dataToConsume) {
-    e = sx1272.getPacket();
+    e = sx1276.getPacket();
     // Received packet correctly
     if (e == 0) {
-      int packetLength = (int)sx1272.getCurrentPacketLength();
+      int packetLength = (int)sx1276.getCurrentPacketLength();
       for (i = 0; i < packetLength; i++)
       {
-          my_packet[i] = (char)sx1272.packet_received.data[i];
+          my_packet[i] = (char)sx1276.packet_received.data[i];
       }
 
       // Reset null terminator
@@ -307,7 +307,7 @@ LoRaFactory::handleRead() {
       NFD_LOG_ERROR("Unable to get packet data: " + std::to_string(e));
       return;
     }
-    dataToConsume = sx1272.checkForData();
+    dataToConsume = sx1276.checkForData();
   }
 
   // If no viable packet was received, just exit
@@ -325,7 +325,7 @@ LoRaFactory::handleRead() {
       // lora://<id>-<connID>
       std::string idString = i.first.substr(numberOfCharsInScheme, position - numberOfCharsInScheme);
       std::string connIDString = i.first.substr(position+1);
-      if (std::stoi(connIDString) == sx1272.packet_received.src && (std::stoi(idString) == sx1272.packet_received.dst || sx1272.packet_received.dst == BROADCAST_0)) {
+      if (std::stoi(connIDString) == sx1276.packet_received.src && (std::stoi(idString) == sx1276.packet_received.dst || sx1276.packet_received.dst == BROADCAST_0)) {
         i.second->handleReceive(element);
       }
     }
@@ -333,7 +333,7 @@ LoRaFactory::handleRead() {
     // lora://<id>
     for (const auto& i : mcast_channels) {
       std::string idString = i.first.substr(numberOfCharsInScheme);
-      if (std::stoi(idString) == sx1272.packet_received.dst || sx1272.packet_received.dst == BROADCAST_0) {
+      if (std::stoi(idString) == sx1276.packet_received.dst || sx1276.packet_received.dst == BROADCAST_0) {
         i.second->handleReceive(element);
       }
     }
