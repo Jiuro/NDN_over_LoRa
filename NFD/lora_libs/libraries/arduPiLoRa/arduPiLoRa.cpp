@@ -1,5 +1,5 @@
 /*
- *  Library for LoRa 868 / 915MHz sx1276 LoRa module
+ *  Library for LoRa 868 / 915MHz SX1272 LoRa module
  *  
  *  Copyright (C) Libelium Comunicaciones Distribuidas S.L. 
  *  http://www.libelium.com 
@@ -37,12 +37,12 @@
  Function: Sets the module ON.
  Returns: uint8_t setLORA state
 */
-uint8_t sx1276::ON()
+uint8_t SX1272::ON()
 {
 
   uint8_t state = 2;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'ON'\n");
   #endif
@@ -61,8 +61,8 @@ uint8_t sx1276::ON()
   delay(100);
 
   // 3.- SPI chip select
-  pinMode(sx1276_SS,OUTPUT);
-  digitalWrite(sx1276_SS,HIGH);
+  pinMode(SX1272_SS,OUTPUT);
+  digitalWrite(SX1272_SS,HIGH);
   delayMicroseconds(100);
  
   //Configure the MISO, MOSI, CS, SPCR.
@@ -75,7 +75,7 @@ uint8_t sx1276::ON()
   SPI.setDataMode(BCM2835_SPI_MODE0);
   delayMicroseconds(100);
   setMaxCurrent(0x1B);
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("## Setting ON with maximum current supply ##\n");
 	  printf("\n");
   #endif
@@ -96,9 +96,9 @@ uint8_t sx1276::ON()
 	writeRegister(0x5,0x52);  // reserved
 	writeRegister(0x6,0xD8);  // RegFrMsb  CH = 14_868, 866.40MHz
 	writeRegister(0x7,0x99);  // RegFrMsb  CH = 14_868, 866.40MHz
-	writeRegister(0x8,0x99);  // RegFrLsb  CH = 14_868, 866.40MHz this will be changed when using the function sx1276.setChannel(CH_10_868) in the main code
+	writeRegister(0x8,0x99);  // RegFrLsb  CH = 14_868, 866.40MHz this will be changed when using the function sx1272.setChannel(CH_10_868) in the main code
 	// Registers for Rf Blocks 
-	writeRegister(0x9,0x0);   // RegPaConfig this will be changed when using the function sx1276.setPower('H') in the main code
+	writeRegister(0x9,0x0);   // RegPaConfig this will be changed when using the function sx1272.setPower('H') in the main code
 	writeRegister(0xA,0x09);  // RegPaRamp 
 	writeRegister(0xB,0x1B);  // RegOcp        in any case the function setMaxCurrent(0x1B) wrote the vlaue of the register 
 	writeRegister(0xC,0x23);  // RegLna  LNA Max gain + Highfreq BoostOn 150% LNA current 
@@ -121,13 +121,13 @@ uint8_t sx1276::ON()
 	writeRegister(0x1C,0x0);  // n/a
 	writeRegister(0x1D,0x82); // RegModemConfig1 (SignalBW + ErrorCodingRate + Explicit/Implicit Header mode)
 	writeRegister(0x1E,0x97); // RegModemConfig2 (SpreadingFactor + Normal/Continous mode + CrC on/off ) 
-	writeRegister(0x1F,0xFF); // sx1276 = SX1276 
-	writeRegister(0x20,0x0);  // sx1276 = SX1276  
-	writeRegister(0x21,0x8);  // sx1276 = SX1276  
-	writeRegister(0x22,0xFF); // sx1276 = SX1276 
-	writeRegister(0x23,0xFF); // sx1276 = SX1276 
-	writeRegister(0x24,0x0);  // sx1276 = SX1276 
-	writeRegister(0x25,0x0);  // sx1276 = SX1276 
+	writeRegister(0x1F,0xFF); // SX1272 = SX1276 
+	writeRegister(0x20,0x0);  // SX1272 = SX1276  
+	writeRegister(0x21,0x8);  // SX1272 = SX1276  
+	writeRegister(0x22,0xFF); // SX1272 = SX1276 
+	writeRegister(0x23,0xFF); // SX1272 = SX1276 
+	writeRegister(0x24,0x0);  // SX1272 = SX1276 
+	writeRegister(0x25,0x0);  // SX1272 = SX1276 
 	writeRegister(0x26,0x04); // RegModemConfig3 (AgcAutoOn = 1 + LowDataRateOptimize = 0)
 	// Reserved registers 0x27 -- 0x3F
 	writeRegister(0x40,0x0);
@@ -141,9 +141,9 @@ uint8_t sx1276::ON()
  Function: Sets the module OFF.
  Returns: Nothing
 */
-void sx1276::OFF()
+void SX1272::OFF()
 {
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'OFF'\n");
   #endif
@@ -154,13 +154,13 @@ void sx1276::OFF()
   SPI.end();
 
   // 2.- Chip Select OFF
-  pinMode(sx1276_SS,OUTPUT);
-  digitalWrite(sx1276_SS,LOW);
+  pinMode(SX1272_SS,OUTPUT);
+  digitalWrite(SX1272_SS,LOW);
 
   // 3.- power OFF embebed socket
   Utils.socketOFF();
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("## Setting OFF ##\n");
 	  printf("\n");
   #endif
@@ -172,18 +172,18 @@ void sx1276::OFF()
  Parameters:
    address: address register to read from
 */
-byte sx1276::readRegister(byte address)
+byte SX1272::readRegister(byte address)
 {
-	digitalWrite(sx1276_SS,LOW);
+	digitalWrite(SX1272_SS,LOW);
     bitClear(address, 7);		// Bit 7 cleared to write in registers
     //SPI.transfer(address);
     //value = SPI.transfer(0x00);
     txbuf[0] = address;
 	txbuf[1] = 0x00;
 	maxWrite16();
-	digitalWrite(sx1276_SS,HIGH);
+	digitalWrite(SX1272_SS,HIGH);
 
-    #if (sx1276_debug_mode > 1)
+    #if (SX1272_debug_mode > 1)
         printf("## Reading:  ##\tRegister ");
 		printf("%X", address);
 		printf(":  ");
@@ -201,9 +201,9 @@ byte sx1276::readRegister(byte address)
    address: address register to write in
    data : value to write in the register
 */
-void sx1276::writeRegister(byte address, byte data)
+void SX1272::writeRegister(byte address, byte data)
 {
-	digitalWrite(sx1276_SS,LOW);
+	digitalWrite(SX1272_SS,LOW);
 	delayMicroseconds(1);
     bitSet(address, 7);			// Bit 7 set to read from registers
     //SPI.transfer(address);
@@ -211,9 +211,9 @@ void sx1276::writeRegister(byte address, byte data)
     txbuf[0] = address;
 	txbuf[1] = data;
 	maxWrite16();
-	//digitalWrite(sx1276_SS,HIGH);
+	//digitalWrite(SX1272_SS,HIGH);
 
-    #if (sx1276_debug_mode > 1)
+    #if (SX1272_debug_mode > 1)
         printf("## Writing:  ##\tRegister ");
 		bitClear(address, 7);
 		printf("%X", address);
@@ -231,18 +231,18 @@ void sx1276::writeRegister(byte address, byte data)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-void sx1276::maxWrite16()
+void SX1272::maxWrite16()
 {
-	digitalWrite(sx1276_SS,LOW);
+	digitalWrite(SX1272_SS,LOW);
 	SPI.transfernb(txbuf, rxbuf, 2);
-	digitalWrite(sx1276_SS,HIGH);
+	digitalWrite(SX1272_SS,HIGH);
 }
 
 /*
  Function: Clears the interruption flags
  Returns: Nothing
 */
-void sx1276::clearFlags()
+void SX1272::clearFlags()
 {
     byte st0;
 
@@ -253,7 +253,7 @@ void sx1276::clearFlags()
 		writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);	// Stdby mode to write in registers
 		writeRegister(REG_IRQ_FLAGS, 0xFF);	// LoRa mode flags register
 		writeRegister(REG_OP_MODE, st0);		// Getting back to previous status
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## LoRa flags cleared ##\n");
 		#endif
 	}
@@ -263,7 +263,7 @@ void sx1276::clearFlags()
 		writeRegister(REG_IRQ_FLAGS1, 0xFF); // FSK mode flags1 register
 		writeRegister(REG_IRQ_FLAGS2, 0xFF); // FSK mode flags2 register
 		writeRegister(REG_OP_MODE, st0);		// Getting back to previous status
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## FSK flags cleared ##\n");
 		#endif
 	}
@@ -276,12 +276,12 @@ void sx1276::clearFlags()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setLORA()
+uint8_t SX1272::setLORA()
 {
     uint8_t state = 2;
     byte st0;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setLORA'\n");
 	#endif
@@ -299,7 +299,7 @@ uint8_t sx1276::setLORA()
 	{ // LoRa mode
 		_modem = LORA;
 		state = 0;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## LoRa set with success ##\n");
 			printf("\n");
 		#endif
@@ -308,7 +308,7 @@ uint8_t sx1276::setLORA()
 	{ // FSK mode
 		_modem = FSK;
 		state = 1;
-//		#if (sx1276_debug_mode > 1)
+//		#if (SX1272_debug_mode > 1)
 			printf("** There has been an error while setting LoRa **\n");
 			printf("\n");
 //		#endif
@@ -323,13 +323,13 @@ uint8_t sx1276::setLORA()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setFSK()
+uint8_t SX1272::setFSK()
 {
 	uint8_t state = 2;
     byte st0;
     byte config1;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setFSK'\n");
 	#endif
@@ -357,7 +357,7 @@ uint8_t sx1276::setFSK()
 	{ // FSK mode
 		_modem = FSK;
 		state = 0;
-//		#if (sx1276_debug_mode > 1)
+//		#if (SX1272_debug_mode > 1)
 			printf("## FSK set with success ##\n");
 			printf("\n");
 //		#endif
@@ -366,7 +366,7 @@ uint8_t sx1276::setFSK()
 	{ // LoRa mode
 		_modem = LORA;
 		state = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** There has been an error while setting FSK **\n");
 			printf("\n");
 		#endif
@@ -381,13 +381,13 @@ uint8_t sx1276::setFSK()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getMode()
+uint8_t SX1272::getMode()
 {
   byte st0;
   int8_t state = 2;
   byte value = 0x00;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getMode'\n");
   #endif
@@ -415,7 +415,7 @@ uint8_t sx1276::getMode()
 	}
   }
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("## Parameters from configuration mode are:\n");
 	  printf("\t Bandwidth: ");
 	  printf("%X", _bandwidth);
@@ -444,14 +444,14 @@ uint8_t sx1276::getMode()
  Parameters:
    mode: mode number to set the required BW, SF and CR of LoRa modem.
 */
-int8_t sx1276::setMode(uint8_t mode)
+int8_t SX1272::setMode(uint8_t mode)
 {
   int8_t state = 2;
   byte st0;
   byte config1 = 0x00;
   byte config2 = 0x00;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setMode'\n");
   #endif
@@ -532,7 +532,7 @@ int8_t sx1276::setMode(uint8_t mode)
 
 	if( state == -1 )	// if state = -1, don't change its value
 	{
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** The indicated mode doesn't exist, ");
 			printf("please select from 1 to 10 **\n");
 		#endif
@@ -649,7 +649,7 @@ int8_t sx1276::setMode(uint8_t mode)
         }// end switch
 
   }
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
   if( state == 0 )
   {
 		  printf("## Mode ");
@@ -680,11 +680,11 @@ int8_t sx1276::setMode(uint8_t mode)
    state = 0  --> The command has been executed with no errors
 */
 	// Modified By Ahmed Awad
-uint8_t	sx1276::getHeader()
+uint8_t	SX1272::getHeader()
 {
 	int8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getHeader'\n");
 	#endif
@@ -705,14 +705,14 @@ uint8_t	sx1276::getHeader()
 
 	if( _modem == FSK )
 	{ // header is not available in FSK mode
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Notice that FSK mode packets hasn't header ##\n");
 			printf("\n");
 		#endif
 	}
 	else
 	{ // header in LoRa mode
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Header is ");
 			if( _header == HEADER_ON )
 			{
@@ -737,12 +737,12 @@ uint8_t	sx1276::getHeader()
    state = -1 --> Forbidden command for this protocol
 */
 	// Modified By Ahmed Awad
-int8_t	sx1276::setHeaderON()
+int8_t	SX1272::setHeaderON()
 {
   int8_t state = 2;
   byte config1;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setHeaderON'\n");
   #endif
@@ -750,7 +750,7 @@ int8_t	sx1276::setHeaderON()
   if( _modem == FSK )
   {
 	  state = -1;		// header is not available in FSK mode
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## FSK mode packets hasn't header ##\n");
 		  printf("\n");
 	  #endif
@@ -761,7 +761,7 @@ int8_t	sx1276::setHeaderON()
 	if( _spreadingFactor == 6 )
 	{
 		state = -1;		// Mandatory headerOFF with SF = 6
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Mandatory implicit header mode with spreading factor = 6 ##\n");
 		#endif
 	}
@@ -777,7 +777,7 @@ int8_t	sx1276::setHeaderON()
 		{
 			state = 0;
 			_header = HEADER_ON;
-			//#if (sx1276_debug_mode > 1)
+			//#if (SX1272_debug_mode > 1)
 				printf("## Header has been activated ##\n");
 				printf("\n");
 			//#endif
@@ -800,12 +800,12 @@ int8_t	sx1276::setHeaderON()
    state = -1 --> Forbidden command for this protocol
 */
 	// Modified By Ahmed Awad
-int8_t	sx1276::setHeaderOFF()
+int8_t	SX1272::setHeaderOFF()
 {
   uint8_t state = 2;
   byte config1;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setHeaderOFF'\n");
   #endif
@@ -813,7 +813,7 @@ int8_t	sx1276::setHeaderOFF()
   if( _modem == FSK )
   { // header is not available in FSK mode
 	  state = -1;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Notice that FSK mode packets hasn't header ##\n");
 		  printf("\n");
 	  #endif
@@ -830,7 +830,7 @@ int8_t	sx1276::setHeaderOFF()
 			state = 0;
 			_header = HEADER_OFF;
 
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 			    printf("## Header has been desactivated ##\n");
 			    printf("\n");
 			#endif
@@ -838,7 +838,7 @@ int8_t	sx1276::setHeaderOFF()
 	  else
 	  {
 		  state = 1;
-		  #if (sx1276_debug_mode > 1)
+		  #if (SX1272_debug_mode > 1)
 			  printf("** Header hasn't been desactivated ##\n");
 			  printf("\n");
 		  #endif
@@ -855,12 +855,12 @@ int8_t	sx1276::setHeaderOFF()
    state = 0  --> The command has been executed with no errors
 */
 // modified by Ahmed Awad
-uint8_t	sx1276::getCRC()
+uint8_t	SX1272::getCRC()
 {
 	int8_t state = 2;
 	byte value;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getCRC'\n");
 	#endif
@@ -873,7 +873,7 @@ uint8_t	sx1276::getCRC()
 		if( bitRead(value, 1) == CRC_OFF )
 		{ // CRCoff
 			_CRC = CRC_OFF;
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 				printf("## CRC is desactivated ##\n");
 				printf("\n");
 			#endif
@@ -882,7 +882,7 @@ uint8_t	sx1276::getCRC()
 		else
 		{ // CRCon
 			_CRC = CRC_ON;
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 				printf("## CRC is activated ##\n");
 				printf("\n");
 			#endif
@@ -897,7 +897,7 @@ uint8_t	sx1276::getCRC()
 		if( bitRead(value, 4) == CRC_OFF )
 		{ // CRCoff
 			_CRC = CRC_OFF;
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 				printf("## CRC is desactivated ##\n");
 				printf("\n");
 			#endif
@@ -906,7 +906,7 @@ uint8_t	sx1276::getCRC()
 		else
 		{ // CRCon
 			_CRC = CRC_ON;
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 				printf("## CRC is activated ##\n");
 				printf("\n");
 			#endif
@@ -916,7 +916,7 @@ uint8_t	sx1276::getCRC()
 	if( state != 0 )
 	{
 		state = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** There has been an error while getting configured CRC **\n");
 			printf("\n");
 		#endif
@@ -931,12 +931,12 @@ uint8_t	sx1276::getCRC()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t	sx1276::setCRC_ON()
+uint8_t	SX1272::setCRC_ON()
 {
   uint8_t state = 2;
   byte config2;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setCRC_ON'\n");
   #endif
@@ -954,7 +954,7 @@ uint8_t	sx1276::setCRC_ON()
 	{ // take out bit 1 from REG_MODEM_CONFIG1 indicates RxPayloadCrcOn
 		state = 0;
 		_CRC = CRC_ON;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## CRC has been activated ##\n");
 			printf("\n");
 		#endif
@@ -973,7 +973,7 @@ uint8_t	sx1276::setCRC_ON()
 	{ // take out bit 4 from REG_PACKET_CONFIG1 indicates CrcOn
 		state = 0;
 		_CRC = CRC_ON;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## CRC has been activated ##\n");
 			printf("\n");
 		#endif
@@ -982,7 +982,7 @@ uint8_t	sx1276::setCRC_ON()
   if( state != 0 )
   {
 	  state = 1;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("** There has been an error while setting CRC ON **\n");
 		  printf("\n");
 	  #endif
@@ -998,12 +998,12 @@ uint8_t	sx1276::setCRC_ON()
    state = 0  --> The command has been executed with no errors
 */
 // modified by Ahmed Awad
-uint8_t	sx1276::setCRC_OFF()
+uint8_t	SX1272::setCRC_OFF()
 {
   int8_t state = 2;
   byte config2;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setCRC_OFF'\n");
   #endif
@@ -1019,7 +1019,7 @@ uint8_t	sx1276::setCRC_OFF()
 	{ // take out bit 1 from REG_MODEM_CONFIG1 indicates RxPayloadCrcOn
 	  state = 0;
 	  _CRC = CRC_OFF;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## CRC has been desactivated ##\n");
 		  printf("\n");
 	  #endif
@@ -1036,7 +1036,7 @@ uint8_t	sx1276::setCRC_OFF()
 	{ // take out bit 4 from REG_PACKET_CONFIG1 indicates RxPayloadCrcOn
 		state = 0;
 		_CRC = CRC_OFF;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 		    printf("## CRC has been desactivated ##\n");
 		    printf("\n");
 	    #endif
@@ -1045,7 +1045,7 @@ uint8_t	sx1276::setCRC_OFF()
   if( state != 0 )
   {
 	  state = 1;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("** There has been an error while setting CRC OFF **\n");
 		  printf("\n");
 	  #endif
@@ -1060,9 +1060,9 @@ uint8_t	sx1276::setCRC_OFF()
  Parameters:
    spr: spreading factor value to check.
 */
-boolean	sx1276::isSF(uint8_t spr)
+boolean	SX1272::isSF(uint8_t spr)
 {
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'isSF'\n");
   #endif
@@ -1081,7 +1081,7 @@ boolean	sx1276::isSF(uint8_t spr)
 
 	  default:		return false;
   }
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("## Finished 'isSF' ##\n");
 	  printf("\n");
   #endif
@@ -1095,12 +1095,12 @@ boolean	sx1276::isSF(uint8_t spr)
    state = 0  --> The command has been executed with no errors
    state = -1 --> Forbidden command for this protocol
 */
-int8_t	sx1276::getSF()
+int8_t	SX1272::getSF()
 {
   int8_t state = 2;
   byte config2;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getSF'\n");
   #endif
@@ -1108,7 +1108,7 @@ int8_t	sx1276::getSF()
   if( _modem == FSK )
   {
 	  state = -1;		// SF is not available in FSK mode
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("** FSK mode hasn't spreading factor **\n");
 		  printf("\n");
 	  #endif
@@ -1123,7 +1123,7 @@ int8_t	sx1276::getSF()
 	if( (config2 == _spreadingFactor) && isSF(_spreadingFactor) )
 	{
 		state = 0;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Spreading factor is ");
 			printf("%X", _spreadingFactor);
 			printf(" ##\n");
@@ -1143,14 +1143,14 @@ int8_t	sx1276::getSF()
  Parameters:
    spr: spreading factor value to set in LoRa modem configuration.
 */
-uint8_t	sx1276::setSF(uint8_t spr)
+uint8_t	SX1272::setSF(uint8_t spr)
 {
   byte st0;
   int8_t state = 2;
   byte config1;
   byte config2;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setSF'\n");
   #endif
@@ -1159,7 +1159,7 @@ uint8_t	sx1276::setSF(uint8_t spr)
 
   if( _modem == FSK )
   {
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Notice that FSK hasn't Spreading Factor parameter, ");
 		  printf("so you are configuring it in LoRa mode ##\n");
 	  #endif
@@ -1304,7 +1304,7 @@ uint8_t	sx1276::setSF(uint8_t spr)
   { // Checking available value for _spreadingFactor
 		state = 0;
 		_spreadingFactor = spr;
-		//#if (sx1276_debug_mode > 1)
+		//#if (SX1272_debug_mode > 1)
 		    printf("## Spreading factor ");
 		    printf("%d", _spreadingFactor);
 		    printf(" has been successfully set ##\n");
@@ -1315,7 +1315,7 @@ uint8_t	sx1276::setSF(uint8_t spr)
   {
 	  if( state != 0 )
 	  {
-		  #if (sx1276_debug_mode > 1)
+		  #if (SX1272_debug_mode > 1)
 		      printf("** There has been an error while setting the spreading factor **");
 		      printf("\n");
 		  #endif
@@ -1332,9 +1332,9 @@ uint8_t	sx1276::setSF(uint8_t spr)
    band: bandwidth value to check.
 */
 // modified by Ahmed Awad
-boolean	sx1276::isBW(uint16_t band)
+boolean	SX1272::isBW(uint16_t band)
 {
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'isBW'\n");
   #endif
@@ -1356,7 +1356,7 @@ boolean	sx1276::isBW(uint16_t band)
 
 	  default:		return false;
   }
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("## Finished 'isBW' ##\n");
 	  printf("\n");
   #endif
@@ -1371,12 +1371,12 @@ boolean	sx1276::isBW(uint16_t band)
    state = -1 --> Forbidden command for this protocol
 */
 // modified by Ahmed Awad
-int8_t	sx1276::getBW()
+int8_t	SX1272::getBW()
 {
   uint8_t state = 2;
   byte config1;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getBW'\n");
   #endif
@@ -1384,7 +1384,7 @@ int8_t	sx1276::getBW()
   if( _modem == FSK )
   {
 	  state = -1;		// BW is not available in FSK mode
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("** FSK mode hasn't bandwidth **\n");
 		  printf("\n");
 	  #endif
@@ -1399,7 +1399,7 @@ int8_t	sx1276::getBW()
 	  if( (config1 == _bandwidth) && isBW(_bandwidth) )
 	  {
 		  state = 0;
-		  #if (sx1276_debug_mode > 1)
+		  #if (SX1272_debug_mode > 1)
 			  printf("## Bandwidth is ");
 			  printf("%X", _bandwidth);
 			  printf(" ##\n");
@@ -1409,7 +1409,7 @@ int8_t	sx1276::getBW()
 	  else
 	  {
 		  state = 1;
-		  #if (sx1276_debug_mode > 1)
+		  #if (SX1272_debug_mode > 1)
 			  printf("** There has been an error while getting bandwidth **");
 			  printf("\n");
 		  #endif
@@ -1428,14 +1428,14 @@ int8_t	sx1276::getBW()
    band: bandwith value to set in LoRa modem configuration.
 */
 // modified by Ahmed Awad
-int8_t	sx1276::setBW(uint16_t band)
+int8_t	SX1272::setBW(uint16_t band)
 {
   byte st0;
   int8_t state = 2;
   byte config1;
   byte config3;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setBW'\n");
   #endif
@@ -1444,7 +1444,7 @@ int8_t	sx1276::setBW(uint16_t band)
 
   if( _modem == FSK )
   {
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Notice that FSK hasn't Bandwidth parameter, ");
 		  printf("so you are configuring it in LoRa mode ##\n");
 	  #endif
@@ -1748,7 +1748,7 @@ int8_t	sx1276::setBW(uint16_t band)
   if( not isBW(band) )
   {
 	  state = 1;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("** Bandwidth ");
 		  printf("%X", band);
 		  printf(" is not a correct value **\n");
@@ -1758,7 +1758,7 @@ int8_t	sx1276::setBW(uint16_t band)
   else
   {
 	  _bandwidth = band;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Bandwidth ");
 		  printf("%X", band);
 		  printf(" has been successfully set ##\n");
@@ -1777,9 +1777,9 @@ int8_t	sx1276::setBW(uint16_t band)
  Parameters:
    cod: coding rate value to check.
 */
-boolean	sx1276::isCR(uint8_t cod)
+boolean	SX1272::isCR(uint8_t cod)
 {
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'isCR'\n");
   #endif
@@ -1795,7 +1795,7 @@ boolean	sx1276::isCR(uint8_t cod)
 
 	  default:		return false;
   }
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("## Finished 'isCR' ##\n");
 	  printf("\n");
   #endif
@@ -1810,12 +1810,12 @@ boolean	sx1276::isCR(uint8_t cod)
    state = -1 --> Forbidden command for this protocol
 */
 // modified by Ahmed Awad
-int8_t	sx1276::getCR()
+int8_t	SX1272::getCR()
 {
   int8_t state = 2;
   byte config1;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getCR'\n");
   #endif
@@ -1823,7 +1823,7 @@ int8_t	sx1276::getCR()
   if( _modem == FSK )
   {
 	  state = -1;		// CR is not available in FSK mode
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("** FSK mode hasn't coding rate **\n");
 		  printf("\n");
 	  #endif
@@ -1840,7 +1840,7 @@ int8_t	sx1276::getCR()
 	if( (config1 == _codingRate) && isCR(_codingRate) )
 	{
 		state = 0;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Coding rate is ");
 			printf("%X", _codingRate);
 			printf(" ##\n");
@@ -1862,13 +1862,13 @@ int8_t	sx1276::getCR()
    cod: coding rate value to set in LoRa modem configuration.
 */
 // Modified By Ahmed Awad
-int8_t	sx1276::setCR(uint8_t cod)
+int8_t	SX1272::setCR(uint8_t cod)
 {
   byte st0;
   int8_t state = 2;
   byte config1;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setCR'\n");
   #endif
@@ -1877,7 +1877,7 @@ int8_t	sx1276::setCR(uint8_t cod)
 
   if( _modem == FSK )
   {
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Notice that FSK hasn't Coding Rate parameter, ");
 		  printf("so you are configuring it in LoRa mode ##\n");
 	  #endif
@@ -1936,7 +1936,7 @@ int8_t	sx1276::setCR(uint8_t cod)
   if( isCR(cod) )
   {
 	  _codingRate = cod;
-	 // #if (sx1276_debug_mode > 1)
+	 // #if (SX1272_debug_mode > 1)
 		  printf("## Coding Rate ");
 		  printf("%X", cod);
 		  printf(" has been successfully set ##\n");
@@ -1946,7 +1946,7 @@ int8_t	sx1276::setCR(uint8_t cod)
   else
   {
 	  state = 1;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("** There has been an error while configuring Coding Rate parameter **\n");
 		  printf("\n");
 	  #endif
@@ -1963,9 +1963,9 @@ int8_t	sx1276::setCR(uint8_t cod)
  Parameters:
    ch: frequency channel value to check.
 */
-boolean	sx1276::isChannel(uint32_t ch)
+boolean	SX1272::isChannel(uint32_t ch)
 {
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'isChannel'\n");
   #endif
@@ -1997,7 +1997,7 @@ boolean	sx1276::isChannel(uint32_t ch)
 
 	  default:			return false;
   }
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("## Finished 'isChannel' ##\n");
 	  printf("\n");
   #endif
@@ -2010,7 +2010,7 @@ boolean	sx1276::isChannel(uint32_t ch)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getChannel()
+uint8_t SX1272::getChannel()
 {
   uint8_t state = 2;
   uint32_t ch;
@@ -2018,7 +2018,7 @@ uint8_t sx1276::getChannel()
   uint8_t freq2;
   uint8_t freq1;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getChannel'\n");
   #endif
@@ -2032,7 +2032,7 @@ uint8_t sx1276::getChannel()
   if( (_channel == ch) && isChannel(_channel) )
   {
 	  state = 0;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Frequency channel is ");
 		  printf("%X", _channel);
 		  printf(" ##\n");
@@ -2056,7 +2056,7 @@ uint8_t sx1276::getChannel()
  Parameters:
    ch: frequency channel value to set in configuration.
 */
-int8_t sx1276::setChannel(uint32_t ch)
+int8_t SX1272::setChannel(uint32_t ch)
 {
   byte st0;
   int8_t state = 2;
@@ -2065,7 +2065,7 @@ int8_t sx1276::setChannel(uint32_t ch)
   uint8_t freq1;
   uint32_t freq;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setChannel'\n");
   #endif
@@ -2107,7 +2107,7 @@ int8_t sx1276::setChannel(uint32_t ch)
   {
     state = 0;
     _channel = ch;
-    #if (sx1276_debug_mode > 1)
+    #if (SX1272_debug_mode > 1)
 		printf("## Frequency channel ");
 		printf("%X", ch);
 		printf(" has been successfully set ##\n");
@@ -2122,7 +2122,7 @@ int8_t sx1276::setChannel(uint32_t ch)
   if( not isChannel(ch) )
   {
 	 state = -1;
-	 #if (sx1276_debug_mode > 1)
+	 #if (SX1272_debug_mode > 1)
 		 printf("** Frequency channel ");
 		 printf("%X", ch);
 		 printf("is not a correct value **\n");
@@ -2142,12 +2142,12 @@ int8_t sx1276::setChannel(uint32_t ch)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getPower()
+uint8_t SX1272::getPower()
 {
   uint8_t state = 2;
   byte value = 0x00;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getPower'\n");
   #endif
@@ -2159,7 +2159,7 @@ uint8_t sx1276::getPower()
   if( (value > -1) & (value < 16) )
   {
 	    state = 0;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Output power is ");
 			printf("%X", _power);
 			printf(" ##\n");
@@ -2180,13 +2180,13 @@ uint8_t sx1276::getPower()
  Parameters:
    p: power option to set in configuration.
 */
-int8_t sx1276::setPower(char p)
+int8_t SX1272::setPower(char p)
 {
   byte st0;
   int8_t state = 2;
   byte value = 0x00;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setPower'\n");
   #endif
@@ -2226,7 +2226,7 @@ int8_t sx1276::setPower(char p)
   if( value == _power )
   {
 	  state = 0;
-	  //#if (sx1276_debug_mode > 1)
+	  //#if (SX1272_debug_mode > 1)
 		  printf("## Output power has been successfully set ##\n");
 		  printf("\n");
 	 //#endif
@@ -2252,13 +2252,13 @@ int8_t sx1276::setPower(char p)
    p: power option to set in configuration.
 */
 // Modified By Ahmed Awad
-int8_t sx1276::setPowerNum(uint8_t pow)
+int8_t SX1272::setPowerNum(uint8_t pow)
 {
   byte st0;
   int8_t state = 2;
   byte value = 0x00;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setPower'\n");
   #endif
@@ -2280,7 +2280,7 @@ int8_t sx1276::setPowerNum(uint8_t pow)
   else
   {
 	  state = -1;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Power value is not valid ##\n");
 		  printf("\n");
 	  #endif
@@ -2292,7 +2292,7 @@ int8_t sx1276::setPowerNum(uint8_t pow)
   if( value == _power )
   {
 	  state = 0;
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Output power has been successfully set ##\n");
 		  printf("\n");
 	  #endif
@@ -2315,12 +2315,12 @@ int8_t sx1276::setPowerNum(uint8_t pow)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getPreambleLength()
+uint8_t SX1272::getPreambleLength()
 {
 	int8_t state = 2;
 	uint8_t p_length;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getPreambleLength'\n");
 	#endif
@@ -2334,7 +2334,7 @@ uint8_t sx1276::getPreambleLength()
 		p_length = readRegister(REG_PREAMBLE_LSB_LORA);
   		// Saving LSB preamble length in LoRa mode
 		_preamblelength = _preamblelength + (p_length & 0xFFFF);
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Preamble length configured is ");
 			printf("%X", _preamblelength);
 			printf(" ##");
@@ -2349,7 +2349,7 @@ uint8_t sx1276::getPreambleLength()
 		p_length = readRegister(REG_PREAMBLE_LSB_FSK);
 		// Saving LSB preamble length in FSK mode
 		_preamblelength = _preamblelength + (p_length & 0xFFFF);
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Preamble length configured is ");
 			printf("%X", _preamblelength);
 			printf(" ##");
@@ -2369,13 +2369,13 @@ uint8_t sx1276::getPreambleLength()
  Parameters:
    l: length value to set as preamble length.
 */
-uint8_t sx1276::setPreambleLength(uint16_t l)
+uint8_t SX1272::setPreambleLength(uint16_t l)
 {
 	byte st0;
 	uint8_t p_length;
 	int8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPreambleLength'\n");
 	#endif
@@ -2404,7 +2404,7 @@ uint8_t sx1276::setPreambleLength(uint16_t l)
 	}
 
 	state = 0;
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("## Preamble length ");
 		printf("%X", l);
 		printf(" has been successfully set ##\n");
@@ -2423,11 +2423,11 @@ uint8_t sx1276::setPreambleLength(uint16_t l)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getPayloadLength()
+uint8_t SX1272::getPayloadLength()
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getPayloadLength'\n");
 	#endif
@@ -2445,7 +2445,7 @@ uint8_t sx1276::getPayloadLength()
 		state = 1;
 	}
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("## Payload length configured is ");
 		printf("%X", _payloadlength);
 		printf(" ##\n");
@@ -2464,7 +2464,7 @@ uint8_t sx1276::getPayloadLength()
    state = 0  --> The command has been executed with no errors
    state = -1 --> Forbidden command for this protocol
 */
-int8_t sx1276::setPacketLength()
+int8_t SX1272::setPacketLength()
 {
 	uint16_t length;
 
@@ -2482,13 +2482,13 @@ int8_t sx1276::setPacketLength()
  Parameters:
    l: length value to set as payload length.
 */
-int8_t sx1276::setPacketLength(uint8_t l)
+int8_t SX1272::setPacketLength(uint8_t l)
 {
 	byte st0;
 	byte value = 0x00;
 	int8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPacketLength'\n");
 	#endif
@@ -2514,7 +2514,7 @@ int8_t sx1276::setPacketLength(uint8_t l)
 	if( packet_sent.length == value )
 	{
 		state = 0;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Packet length ");
 			printf("%d", packet_sent.length);
 			printf(" has been successfully set ##\n");
@@ -2538,12 +2538,12 @@ int8_t sx1276::setPacketLength(uint8_t l)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getNodeAddress()
+uint8_t SX1272::getNodeAddress()
 {
 	byte st0 = 0;
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getNodeAddress'\n");
 	#endif
@@ -2565,7 +2565,7 @@ uint8_t sx1276::getNodeAddress()
 	}
 
 	state = 0;
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("## Node address configured is ");
 		printf("%d", _nodeAddress);
 		printf(" ##\n");
@@ -2584,13 +2584,13 @@ uint8_t sx1276::getNodeAddress()
  Parameters:
    addr: address value to set as node address.
 */
-int8_t sx1276::setNodeAddress(uint8_t addr)
+int8_t SX1272::setNodeAddress(uint8_t addr)
 {
 	byte st0;
 	byte value;
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setNodeAddress'\n");
 	#endif
@@ -2598,7 +2598,7 @@ int8_t sx1276::setNodeAddress(uint8_t addr)
 	if( addr > 255 )
 	{
 		state = -1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Node address must be less than 255 **\n");
 			printf("\n");
 		#endif
@@ -2628,7 +2628,7 @@ int8_t sx1276::setNodeAddress(uint8_t addr)
 		if( value == _nodeAddress )
 		{
 			state = 0;
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 				printf("## Node address ");
 				printf("%d", addr);
 				printf(" has been successfully set ##\n");
@@ -2638,7 +2638,7 @@ int8_t sx1276::setNodeAddress(uint8_t addr)
 		else
 		{
 			state = 1;
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 				printf("** There has been an error while setting address ##\n");
 				printf("\n");
 			#endif
@@ -2655,12 +2655,12 @@ int8_t sx1276::setNodeAddress(uint8_t addr)
    state = 0  --> The command has been executed with no errors
    state = -1 --> Forbidden command for this protocol
 */
-int8_t sx1276::getSNR()
+int8_t SX1272::getSNR()
 {	// getSNR exists only in LoRa mode
   int8_t state = 2;
   byte value;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getSNR'\n");
   #endif
@@ -2681,7 +2681,7 @@ int8_t sx1276::getSNR()
 		  _SNR = ( value & 0xFF ) >> 2;
 	  }
 	  state = 0;
-	  #if (sx1276_debug_mode > 0)
+	  #if (SX1272_debug_mode > 0)
 		  printf("## SNR value is ");
 		  printf("%d", _SNR);
 		  printf(" ##\n");
@@ -2691,7 +2691,7 @@ int8_t sx1276::getSNR()
   else
   { // forbidden command if FSK mode
 	state = -1;
-	#if (sx1276_debug_mode > 0)
+	#if (SX1272_debug_mode > 0)
 		printf("** SNR does not exist in FSK mode **\n");
 		printf("\n");
 	#endif
@@ -2706,13 +2706,13 @@ int8_t sx1276::getSNR()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getRSSI()
+uint8_t SX1272::getRSSI()
 {
   uint8_t state = 2;
   int rssi_mean = 0;
   int total = 5;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getRSSI'\n");
 	#endif
@@ -2731,7 +2731,7 @@ uint8_t sx1276::getRSSI()
         _RSSI = rssi_mean;
         
         state = 0;
-	  #if (sx1276_debug_mode > 0)
+	  #if (SX1272_debug_mode > 0)
 		  printf("## RSSI value is ");
 		  printf("%d", _RSSI);
 		  printf(" ##\n");
@@ -2753,7 +2753,7 @@ uint8_t sx1276::getRSSI()
         
         state = 0;
 
-	  #if (sx1276_debug_mode > 0)
+	  #if (SX1272_debug_mode > 0)
 		  printf("## RSSI value is ");
 		  printf("%d", _RSSI);
 		  printf(" ##\n");
@@ -2771,11 +2771,11 @@ uint8_t sx1276::getRSSI()
    state = 0  --> The command has been executed with no errors
    state = -1 --> Forbidden command for this protocol
 */
-int16_t sx1276::getRSSIpacket()
+int16_t SX1272::getRSSIpacket()
 {	// RSSIpacket only exists in LoRa
   int8_t state = 2;
 
-  #if (sx1276_debug_mode > 1)
+  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'getRSSIpacket'\n");
   #endif
@@ -2797,7 +2797,7 @@ int16_t sx1276::getRSSIpacket()
 			  _RSSIpacket = -OFFSET_RSSI + ( double )_RSSIpacket;
 			  state = 0;
 		  }
-	  #if (sx1276_debug_mode > 0)
+	  #if (SX1272_debug_mode > 0)
 		  printf("## RSSI packet value is ");
 		  printf("%d", _RSSIpacket);
   		  printf(" ##\n");
@@ -2808,7 +2808,7 @@ int16_t sx1276::getRSSIpacket()
   else
   { // RSSI packet doesn't exist in FSK mode
 	state = -1;
-	#if (sx1276_debug_mode > 0)
+	#if (SX1272_debug_mode > 0)
 		printf("** RSSI packet does not exist in FSK mode **\n");
 		printf("\n");
 	#endif
@@ -2824,11 +2824,11 @@ int16_t sx1276::getRSSIpacket()
    state = 0  --> The command has been executed with no errors
    state = -1 -->
 */
-uint8_t sx1276::setRetries(uint8_t ret)
+uint8_t SX1272::setRetries(uint8_t ret)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setRetries'\n");
 	#endif
@@ -2837,7 +2837,7 @@ uint8_t sx1276::setRetries(uint8_t ret)
 	if( ret > MAX_RETRIES )
 	{
 		state = -1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Retries value can't be greater than ");
 			printf("%d", MAX_RETRIES);
 			printf(" **\n");
@@ -2848,7 +2848,7 @@ uint8_t sx1276::setRetries(uint8_t ret)
 	{
 		_maxRetries = ret;
 		state = 0;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("## Maximum retries value = ");
 			printf("%d", _maxRetries);
 			printf(" ##\n");
@@ -2867,12 +2867,12 @@ uint8_t sx1276::setRetries(uint8_t ret)
  Parameters:
    rate: value to compute the maximum current supply. Maximum current is 45+5*'rate' [mA]
 */
-uint8_t sx1276::getMaxCurrent()
+uint8_t SX1272::getMaxCurrent()
 {
 	int8_t state = 2;
 	byte value;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getMaxCurrent'\n");
 	#endif
@@ -2897,7 +2897,7 @@ uint8_t sx1276::getMaxCurrent()
     }
 
 	_maxCurrent = value;
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("## Maximum current supply configured is ");
 		printf("%d", value);
 		printf(" mA ##\n");
@@ -2917,12 +2917,12 @@ uint8_t sx1276::getMaxCurrent()
  Parameters:
    rate: value to compute the maximum current supply. Maximum current is 45+5*'rate' [mA]
 */
-int8_t sx1276::setMaxCurrent(uint8_t rate)
+int8_t SX1272::setMaxCurrent(uint8_t rate)
 {
 	int8_t state = 2;
 	byte st0;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setMaxCurrent'\n");
 	#endif
@@ -2931,7 +2931,7 @@ int8_t sx1276::setMaxCurrent(uint8_t rate)
 	if (rate > 0x1B)
 	{
 		state = -1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Maximum current supply is 240 mA, ");
 			printf("so maximum parameter value must be 27 (DEC) or 0x1B (HEX) **\n");
 			printf("\n");
@@ -2966,12 +2966,12 @@ int8_t sx1276::setMaxCurrent(uint8_t rate)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getRegs()
+uint8_t SX1272::getRegs()
 {
 	int8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getRegs'\n");
 	#endif
@@ -2985,7 +2985,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting mode **\n");
 		#endif
 	}
@@ -2996,7 +2996,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting power **\n");
 		#endif
 	}
@@ -3007,7 +3007,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting channel **\n");
 		#endif
 	}
@@ -3018,7 +3018,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting CRC **\n");
 		#endif
 	}
@@ -3029,7 +3029,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting header **\n");
 		#endif
 	}
@@ -3040,7 +3040,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting preamble length **\n");
 		#endif
 	}
@@ -3051,7 +3051,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting payload length **\n");
 		#endif
 	}
@@ -3062,7 +3062,7 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting node address **\n");
 		#endif
 	}
@@ -3073,13 +3073,13 @@ uint8_t sx1276::getRegs()
 	else
 	{
 		state_f = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting maximum current supply **\n");
 		#endif
 	}
 	if( state_f != 0 )
 	{
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("** Error getting temperature **\n");
 			printf("\n");
 		#endif
@@ -3094,13 +3094,13 @@ uint8_t sx1276::getRegs()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::truncPayload(uint16_t length16)
+uint8_t SX1272::truncPayload(uint16_t length16)
 {
 	uint8_t state = 2;
 
 	state = 1;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'truncPayload'\n");
 	#endif
@@ -3125,11 +3125,11 @@ uint8_t sx1276::truncPayload(uint16_t length16)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setACK()
+uint8_t SX1272::setACK()
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setACK'\n");
 	#endif
@@ -3170,7 +3170,7 @@ uint8_t sx1276::setACK()
 		writeRegister(REG_FIFO, ACK.length); 	// Writing the packet length in FIFO
 		writeRegister(REG_FIFO, ACK.data[0]);	// Writing the ACK in FIFO
 
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 			printf("## ACK set and written in FIFO ##\n");
 			// Print the complete ACK if debug_mode
 			printf("## ACK to send:\n");
@@ -3203,11 +3203,11 @@ uint8_t sx1276::setACK()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receive()
+uint8_t SX1272::receive()
 {
 	  uint8_t state = 2;
 
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("\n");
 		  printf("Starting 'receive'\n");
 	  #endif
@@ -3233,7 +3233,7 @@ uint8_t sx1276::receive()
 	  { // LoRa mode
 	  	  state = setPacketLength(MAX_LENGTH);	// With MAX_LENGTH gets all packets with length < MAX_LENGTH
 		  writeRegister(REG_OP_MODE, LORA_RX_MODE);  	  // LORA mode - Rx
-		  #if (sx1276_debug_mode > 1)
+		  #if (SX1272_debug_mode > 1)
 		  	  printf("## Receiving LoRa mode activated with success ##\n");
 		  	  printf("\n");
 		  #endif
@@ -3242,7 +3242,7 @@ uint8_t sx1276::receive()
 	  { // FSK mode
 		  state = setPacketLength();
 		  writeRegister(REG_OP_MODE, FSK_RX_MODE);  // FSK mode - Rx
-		  #if (sx1276_debug_mode > 1)
+		  #if (SX1272_debug_mode > 1)
 		  	  printf("## Receiving FSK mode activated with success ##\n");
 		  	  printf("\n");
 		  #endif
@@ -3257,7 +3257,7 @@ uint8_t sx1276::receive()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receivePacketMAXTimeout()
+uint8_t SX1272::receivePacketMAXTimeout()
 {
 	return receivePacketTimeout(MAX_TIMEOUT);
 }
@@ -3269,7 +3269,7 @@ uint8_t sx1276::receivePacketMAXTimeout()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receivePacketTimeout()
+uint8_t SX1272::receivePacketTimeout()
 {
 	setTimeout();
 	return receivePacketTimeout(_sendTime);
@@ -3282,12 +3282,12 @@ uint8_t sx1276::receivePacketTimeout()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receivePacketTimeout(uint16_t wait)
+uint8_t SX1272::receivePacketTimeout(uint16_t wait)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'receivePacketTimeout'\n");
 	#endif
@@ -3319,7 +3319,7 @@ uint8_t sx1276::receivePacketTimeout(uint16_t wait)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receivePacketMAXTimeoutACK()
+uint8_t SX1272::receivePacketMAXTimeoutACK()
 {
 	return receivePacketTimeoutACK(MAX_TIMEOUT);
 }
@@ -3331,7 +3331,7 @@ uint8_t sx1276::receivePacketMAXTimeoutACK()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receivePacketTimeoutACK()
+uint8_t SX1272::receivePacketTimeoutACK()
 {
 	setTimeout();
 	return receivePacketTimeoutACK(_sendTime);
@@ -3346,13 +3346,13 @@ uint8_t sx1276::receivePacketTimeoutACK()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receivePacketTimeoutACK(uint16_t wait)
+uint8_t SX1272::receivePacketTimeoutACK(uint16_t wait)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'receivePacketTimeoutACK'\n");
 	#endif
@@ -3392,7 +3392,7 @@ uint8_t sx1276::receivePacketTimeoutACK(uint16_t wait)
 			if( state == 0 )
 			{
 			state_f = 0;
-			#if (sx1276_debug_mode > 1)
+			#if (SX1272_debug_mode > 1)
 				printf("This last packet was an ACK, so ...\n");
 				printf("ACK successfully sent\n");
 				printf("\n");
@@ -3422,7 +3422,7 @@ uint8_t sx1276::receivePacketTimeoutACK(uint16_t wait)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t	sx1276::receiveAll()
+uint8_t	SX1272::receiveAll()
 {
 	return receiveAll(MAX_TIMEOUT);
 }
@@ -3434,12 +3434,12 @@ uint8_t	sx1276::receiveAll()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::receiveAll(uint16_t wait)
+uint8_t SX1272::receiveAll(uint16_t wait)
 {
 	  uint8_t state = 2;
 	  byte config1;
 
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("\n");
 		  printf("Starting 'receiveAll'\n");
 	  #endif
@@ -3451,7 +3451,7 @@ uint8_t sx1276::receiveAll(uint16_t wait)
 		 config1 = config1 & 0B11111001;			// clears bits 2-1 from REG_PACKET_CONFIG1
 		 writeRegister(REG_PACKET_CONFIG1, config1);		// AddressFiltering = None
 	  }
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("## Address filtering desactivated ##\n");
 		  printf("\n");
 	  #endif
@@ -3468,7 +3468,7 @@ uint8_t sx1276::receiveAll(uint16_t wait)
  Returns: Boolean that's 'true' if the packet is for the module and
 		  it's 'false' if the packet is not for the module.
 */
-boolean	sx1276::availableData()
+boolean	SX1272::availableData()
 {
 	return availableData(MAX_TIMEOUT);
 }
@@ -3476,7 +3476,7 @@ boolean	sx1276::availableData()
 /*
 	Checks to see if there is any data available with no timeout/delay
 */
-boolean sx1276::checkForData()
+boolean SX1272::checkForData()
 {
 	byte value;
 	value = readRegister(REG_IRQ_FLAGS);
@@ -3495,7 +3495,7 @@ boolean sx1276::checkForData()
  Parameters:
    wait: time to wait while there is no a valid header received.
 */
-boolean	sx1276::availableData(uint16_t wait)
+boolean	SX1272::availableData(uint16_t wait)
 {
 	byte value;
 	byte header = 0;
@@ -3504,7 +3504,7 @@ boolean	sx1276::availableData(uint16_t wait)
 	unsigned long previous;
 
 
-	#if (sx1276_debug_mode > 0)
+	#if (SX1272_debug_mode > 0)
 		printf("\n");
 		printf("Starting 'availableData'\n");
 	#endif
@@ -3525,7 +3525,7 @@ boolean	sx1276::availableData(uint16_t wait)
 		} // end while (millis)
 		if( bitRead(value, 4) == 1 )
 		{ // header received
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Valid Header received in LoRa mode ##\n");
 			#endif
 			_hreceived = true;
@@ -3548,7 +3548,7 @@ boolean	sx1276::availableData(uint16_t wait)
 		{
 			forme = false;
 			_hreceived = false;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("** The timeout has expired **\n");
 				printf("\n");
 			#endif
@@ -3570,7 +3570,7 @@ boolean	sx1276::availableData(uint16_t wait)
 		if( bitRead(value, 2) == 1 )	// something received
 		{
 			_hreceived = true;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Valid Preamble detected in FSK mode ##\n");
 			#endif
 			// Reading first byte of the received packet
@@ -3580,7 +3580,7 @@ boolean	sx1276::availableData(uint16_t wait)
 		{
 			forme = false;
 			_hreceived = false;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("** The timeout has expired **\n");
 				printf("\n");
 			#endif
@@ -3590,20 +3590,20 @@ boolean	sx1276::availableData(uint16_t wait)
 // updated and is not the _destination value from the previously packet
 	if( _hreceived )
 	{ // Checking destination
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 			printf("## Checking destination ##\n");
 		#endif
 		if( (_destination == _nodeAddress) || (_destination == BROADCAST_0) )
 		{ // LoRa or FSK mode
 			forme = true;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Packet received is for me ##\n");
 			#endif
 		}
 		else
 		{
 			forme = false;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Packet received is not for me ##\n");
 				printf("\n");
 			#endif
@@ -3630,7 +3630,7 @@ boolean	sx1276::availableData(uint16_t wait)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getPacketMAXTimeout()
+uint8_t SX1272::getPacketMAXTimeout()
 {
 	return getPacket(MAX_TIMEOUT);
 }
@@ -3639,7 +3639,7 @@ uint8_t sx1276::getPacketMAXTimeout()
 	Function used for getting the length of the data that is returned
 	5 bytes are used for overhead so don't take that into account
 */
-uint8_t sx1276::getCurrentPacketLength()
+uint8_t SX1272::getCurrentPacketLength()
 {
 	return packet_received.length - OFFSET_PAYLOADLENGTH;
 }
@@ -3651,7 +3651,7 @@ uint8_t sx1276::getCurrentPacketLength()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-int8_t sx1276::getPacket()
+int8_t SX1272::getPacket()
 {
 	return getPacket(MAX_TIMEOUT);
 }
@@ -3667,14 +3667,14 @@ int8_t sx1276::getPacket()
  Parameters:
    wait: time to wait while there is no a valid header received.
 */
-int8_t sx1276::getPacket(uint16_t wait)
+int8_t SX1272::getPacket(uint16_t wait)
 {
 	uint8_t state = 2;
 	byte value = 0x00;
 	unsigned long previous;
 	boolean p_received = false;
 
-	#if (sx1276_debug_mode > 0)
+	#if (SX1272_debug_mode > 0)
 		printf("\n");
 		printf("Starting 'getPacket'\n");
 	#endif
@@ -3698,7 +3698,7 @@ int8_t sx1276::getPacket(uint16_t wait)
 		{ // packet received & CRC correct
 			p_received = true;	// packet correctly received
 			_reception = CORRECT_PACKET;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Packet correctly received in LoRa mode ##\n");
 			#endif
 		}
@@ -3708,7 +3708,7 @@ int8_t sx1276::getPacket(uint16_t wait)
 			{ // CRC incorrect
 				_reception = INCORRECT_PACKET;
 				state = 3;
-				#if (sx1276_debug_mode > 0)
+				#if (SX1272_debug_mode > 0)
 					printf("** The CRC is incorrect **\n");
 					printf("\n");
 				#endif
@@ -3734,7 +3734,7 @@ int8_t sx1276::getPacket(uint16_t wait)
 			{ // CRC correct
 				_reception = CORRECT_PACKET;
 				p_received = true;
-				#if (sx1276_debug_mode > 0)
+				#if (SX1272_debug_mode > 0)
 					printf("## Packet correctly received in FSK mode ##\n");
 				#endif
 			}
@@ -3743,14 +3743,14 @@ int8_t sx1276::getPacket(uint16_t wait)
 				_reception = INCORRECT_PACKET;
 				state = 3;
 				p_received = false;
-				#if (sx1276_debug_mode > 0)
+				#if (SX1272_debug_mode > 0)
 					printf("## Packet incorrectly received in FSK mode ##\n");
 				#endif
 			}
 		}
 		else
 		{
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("** The timeout has expired **\n");
 				printf("\n");
 			#endif
@@ -3786,7 +3786,7 @@ int8_t sx1276::getPacket(uint16_t wait)
 		}
 		if( packet_received.length > (MAX_LENGTH + 1) )
 		{
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("Corrupted packet, length must be less than 256\n");
 			#endif
 		}
@@ -3798,7 +3798,7 @@ int8_t sx1276::getPacket(uint16_t wait)
 			}
 			packet_received.retry = readRegister(REG_FIFO);
 			// Print the packet if debug_mode
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Packet received:\n");
 				printf("Destination: ");
 				printf("%d\n", packet_received.dst);			 	// Printing destination
@@ -3828,7 +3828,7 @@ int8_t sx1276::getPacket(uint16_t wait)
 		if( (_reception == INCORRECT_PACKET) && (_retries < _maxRetries) )
 		{
 			_retries++;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Retrying to send the last packet ##\n");
 				printf("\n");
 			#endif
@@ -3842,7 +3842,7 @@ int8_t sx1276::getPacket(uint16_t wait)
 	if( wait > MAX_WAIT )
 	{
 		state = -1;
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 			printf("** The timeout must be smaller than 12.5 seconds **\n");
 			printf("\n");
 		#endif
@@ -3860,11 +3860,11 @@ int8_t sx1276::getPacket(uint16_t wait)
  Parameters:
    dest: destination value of the packet sent.
 */
-int8_t sx1276::setDestination(uint8_t dest)
+int8_t SX1272::setDestination(uint8_t dest)
 {
 	int8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setDestination'\n");
 	#endif
@@ -3877,7 +3877,7 @@ int8_t sx1276::setDestination(uint8_t dest)
 	_packetNumber++;
 	state = 0;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("## Destination ");
 		printf("%X", _destination);
 		printf(" successfully set ##\n");
@@ -3899,12 +3899,12 @@ int8_t sx1276::setDestination(uint8_t dest)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setTimeout()
+uint8_t SX1272::setTimeout()
 {
 	uint8_t state = 2;
 	uint16_t delay;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setTimeout'\n");
 	#endif
@@ -4209,7 +4209,7 @@ uint8_t sx1276::setTimeout()
 	}
 	delay = ((0.1*_sendTime) + 1);
 	_sendTime = (uint16_t) ((_sendTime * 1.2) + (rand()%delay));
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("Timeout to send/receive is: ");
 		printf("%d",_sendTime);
 		printf("\n");
@@ -4225,13 +4225,13 @@ uint8_t sx1276::setTimeout()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setPayload(char *payload)
+uint8_t SX1272::setPayload(char *payload)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 	uint16_t length16;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPayload'\n");
 	#endif
@@ -4255,7 +4255,7 @@ uint8_t sx1276::setPayload(char *payload)
 	{
 		_payloadlength = MAX_PAYLOAD_FSK;
 		state = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("In FSK, payload length must be less than 60 bytes.\n");
 			printf("\n");
 		#endif
@@ -4276,12 +4276,12 @@ uint8_t sx1276::setPayload(char *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setPayload(char *payload, uint16_t payloadLength)
+uint8_t SX1272::setPayload(char *payload, uint16_t payloadLength)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPayload'\n");
 	#endif
@@ -4304,7 +4304,7 @@ uint8_t sx1276::setPayload(char *payload, uint16_t payloadLength)
 	{
 		_payloadlength = MAX_PAYLOAD_FSK;
 		state = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("In FSK, payload length must be less than 60 bytes.\n");
 			printf("\n");
 		#endif
@@ -4321,11 +4321,11 @@ uint8_t sx1276::setPayload(char *payload, uint16_t payloadLength)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setPayload(uint8_t *payload)
+uint8_t SX1272::setPayload(uint8_t *payload)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPayload'\n");
 	#endif
@@ -4335,7 +4335,7 @@ uint8_t sx1276::setPayload(uint8_t *payload)
 	{
 		_payloadlength = MAX_PAYLOAD_FSK;
 		state = 1;
-		#if (sx1276_debug_mode > 1)
+		#if (SX1272_debug_mode > 1)
 			printf("In FSK, payload length must be less than 60 bytes.\n");
 			printf("\n");
 		#endif
@@ -4356,12 +4356,12 @@ uint8_t sx1276::setPayload(uint8_t *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setPacket(uint8_t dest, char *payload)
+uint8_t SX1272::setPacket(uint8_t dest, char *payload)
 {
 	int8_t state = 2;
 
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPacket'\n");
 	#endif
@@ -4394,7 +4394,7 @@ uint8_t sx1276::setPacket(uint8_t dest, char *payload)
 		}
 		state = setPacketLength();
 		packet_sent.retry = _retries;
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 			printf("** Retrying to send last packet ");
 			printf("%d", _retries);
 			printf(" time **\n");
@@ -4415,7 +4415,7 @@ uint8_t sx1276::setPacket(uint8_t dest, char *payload)
 		}
 		writeRegister(REG_FIFO, packet_sent.retry);		// Writing the number retry in FIFO
 		state = 0;
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 				printf("## Packet set and written in FIFO ##\n");
 				// Print the complete packet if debug_mode
 				printf("## Packet to send:  \n");
@@ -4452,12 +4452,12 @@ uint8_t sx1276::setPacket(uint8_t dest, char *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setPacket(uint8_t dest, char *payload, uint16_t payloadLength)
+uint8_t SX1272::setPacket(uint8_t dest, char *payload, uint16_t payloadLength)
 {
 	int8_t state = 2;
 
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPacket'\n");
 	#endif
@@ -4490,7 +4490,7 @@ uint8_t sx1276::setPacket(uint8_t dest, char *payload, uint16_t payloadLength)
 		}
 		state = setPacketLength();
 		packet_sent.retry = _retries;
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 			printf("** Retrying to send last packet ");
 			printf("%d", _retries);
 			printf(" time **\n");
@@ -4511,7 +4511,7 @@ uint8_t sx1276::setPacket(uint8_t dest, char *payload, uint16_t payloadLength)
 		}
 		writeRegister(REG_FIFO, packet_sent.retry);		// Writing the number retry in FIFO
 		state = 0;
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 				printf("## Packet set and written in FIFO ##\n");
 				// Print the complete packet if debug_mode
 				printf("## Packet to send:  \n");
@@ -4546,12 +4546,12 @@ uint8_t sx1276::setPacket(uint8_t dest, char *payload, uint16_t payloadLength)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::setPacket(uint8_t dest, uint8_t *payload)
+uint8_t SX1272::setPacket(uint8_t dest, uint8_t *payload)
 {
 	int8_t state = 2;
 	byte st0;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPacket'\n");
 	#endif
@@ -4585,7 +4585,7 @@ uint8_t sx1276::setPacket(uint8_t dest, uint8_t *payload)
 		}
 		state = setPacketLength();
 		packet_sent.retry = _retries;
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 			printf("** Retrying to send last packet ");
 			printf("%d", _retries);
 			printf(" time **\n");
@@ -4606,7 +4606,7 @@ uint8_t sx1276::setPacket(uint8_t dest, uint8_t *payload)
 		}
 		writeRegister(REG_FIFO, packet_sent.retry);		// Writing the number retry in FIFO
 		state = 0;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("## Packet set and written in FIFO ##\n");
 				// Print the complete packet if debug_mode
 				printf("## Packet to send:  \n");
@@ -4641,7 +4641,7 @@ uint8_t sx1276::setPacket(uint8_t dest, uint8_t *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendWithMAXTimeout()
+uint8_t SX1272::sendWithMAXTimeout()
 {
 	return sendWithTimeout(MAX_TIMEOUT);
 }
@@ -4653,7 +4653,7 @@ uint8_t sx1276::sendWithMAXTimeout()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendWithTimeout()
+uint8_t SX1272::sendWithTimeout()
 {
 	setTimeout();
 	return sendWithTimeout(_sendTime);
@@ -4666,13 +4666,13 @@ uint8_t sx1276::sendWithTimeout()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendWithTimeout(uint16_t wait)
+uint8_t SX1272::sendWithTimeout(uint16_t wait)
 {
 	  uint8_t state = 2;
 	  byte value = 0x00;
 	  unsigned long previous;
 
-	  #if (sx1276_debug_mode > 1)
+	  #if (SX1272_debug_mode > 1)
 		  printf("\n");
 	      printf("Starting 'sendWithTimeout'\n");
 	  #endif
@@ -4719,7 +4719,7 @@ uint8_t sx1276::sendWithTimeout(uint16_t wait)
 	  if( bitRead(value, 3) == 1 )
 	  {
 		  state = 0;	// Packet successfully sent
-		  #if (sx1276_debug_mode > 1)
+		  #if (SX1272_debug_mode > 1)
 			  printf("## Packet successfully sent ##\n");
 			  printf("\n");
 		  #endif
@@ -4728,14 +4728,14 @@ uint8_t sx1276::sendWithTimeout(uint16_t wait)
 	  {
 		  if( state == 1 )
 		  {
-			  #if (sx1276_debug_mode > 1)
+			  #if (SX1272_debug_mode > 1)
 				  printf("** Timeout has expired **\n");
 				  printf("\n");
 			  #endif
 		  }
 		  else
 		  {
-			  #if (sx1276_debug_mode > 1)
+			  #if (SX1272_debug_mode > 1)
 				  printf("** There has been an error and packet has not been sent **\n");
 				  printf("\n");
 			  #endif
@@ -4753,7 +4753,7 @@ uint8_t sx1276::sendWithTimeout(uint16_t wait)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketMAXTimeout(uint8_t dest, char *payload)
+uint8_t SX1272::sendPacketMAXTimeout(uint8_t dest, char *payload)
 {
 	return sendPacketTimeout(dest, payload, MAX_TIMEOUT);
 }
@@ -4765,7 +4765,7 @@ uint8_t sx1276::sendPacketMAXTimeout(uint8_t dest, char *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketMAXTimeout(uint8_t dest,  uint8_t *payload, uint16_t length16)
+uint8_t SX1272::sendPacketMAXTimeout(uint8_t dest,  uint8_t *payload, uint16_t length16)
 {
 	return sendPacketTimeout(dest, payload, length16, MAX_TIMEOUT);
 }
@@ -4777,11 +4777,11 @@ uint8_t sx1276::sendPacketMAXTimeout(uint8_t dest,  uint8_t *payload, uint16_t l
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeout(uint8_t dest, char *payload)
+uint8_t SX1272::sendPacketTimeout(uint8_t dest, char *payload)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeout'\n");
 	#endif
@@ -4803,11 +4803,11 @@ uint8_t sx1276::sendPacketTimeout(uint8_t dest, char *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeout(uint8_t dest, char *payload, int payloadLength)
+uint8_t SX1272::sendPacketTimeout(uint8_t dest, char *payload, int payloadLength)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeout'\n");
 	#endif
@@ -4826,12 +4826,12 @@ uint8_t sx1276::sendPacketTimeout(uint8_t dest, char *payload, int payloadLength
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeout(uint8_t dest, uint8_t *payload, uint16_t length16)
+uint8_t SX1272::sendPacketTimeout(uint8_t dest, uint8_t *payload, uint16_t length16)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeout'\n");
 	#endif
@@ -4859,11 +4859,11 @@ uint8_t sx1276::sendPacketTimeout(uint8_t dest, uint8_t *payload, uint16_t lengt
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeout(uint8_t dest, char *payload, uint16_t wait)
+uint8_t SX1272::sendPacketTimeout(uint8_t dest, char *payload, uint16_t wait)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeout'\n");
 	#endif
@@ -4883,12 +4883,12 @@ uint8_t sx1276::sendPacketTimeout(uint8_t dest, char *payload, uint16_t wait)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeout(uint8_t dest, uint8_t *payload, uint16_t length16, uint16_t wait)
+uint8_t SX1272::sendPacketTimeout(uint8_t dest, uint8_t *payload, uint16_t length16, uint16_t wait)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeout'\n");
 	#endif
@@ -4916,7 +4916,7 @@ uint8_t sx1276::sendPacketTimeout(uint8_t dest, uint8_t *payload, uint16_t lengt
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketMAXTimeoutACK(uint8_t dest, char *payload)
+uint8_t SX1272::sendPacketMAXTimeoutACK(uint8_t dest, char *payload)
 {
 	return sendPacketTimeoutACK(dest, payload, MAX_TIMEOUT);
 }
@@ -4928,7 +4928,7 @@ uint8_t sx1276::sendPacketMAXTimeoutACK(uint8_t dest, char *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketMAXTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t length16)
+uint8_t SX1272::sendPacketMAXTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t length16)
 {
 	return sendPacketTimeoutACK(dest, payload, length16, MAX_TIMEOUT);
 }
@@ -4941,12 +4941,12 @@ uint8_t sx1276::sendPacketMAXTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, char *payload)
+uint8_t SX1272::sendPacketTimeoutACK(uint8_t dest, char *payload)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACK'\n");
 	#endif
@@ -4987,12 +4987,12 @@ uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, char *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t length16)
+uint8_t SX1272::sendPacketTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t length16)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACK'\n");
 	#endif
@@ -5035,12 +5035,12 @@ uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t le
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, char *payload, uint16_t wait)
+uint8_t SX1272::sendPacketTimeoutACK(uint8_t dest, char *payload, uint16_t wait)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACK'\n");
 	#endif
@@ -5081,12 +5081,12 @@ uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, char *payload, uint16_t wait)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t length16, uint16_t wait)
+uint8_t SX1272::sendPacketTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t length16, uint16_t wait)
 {
 	uint8_t state = 2;
 	uint8_t state_f = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACK'\n");
 	#endif
@@ -5123,7 +5123,7 @@ uint8_t sx1276::sendPacketTimeoutACK(uint8_t dest, uint8_t *payload, uint16_t le
  Function: It gets and stores an ACK if it is received.
  Returns:
 */
-uint8_t sx1276::getACK()
+uint8_t SX1272::getACK()
 {
 	return getACK(MAX_TIMEOUT);
 }
@@ -5137,14 +5137,14 @@ uint8_t sx1276::getACK()
  Parameters:
    wait: time to wait while there is no a valid header received.
 */
-uint8_t sx1276::getACK(uint16_t wait)
+uint8_t SX1272::getACK(uint16_t wait)
 {
 	uint8_t state = 2;
 	byte value = 0x00;
 	unsigned long previous;
 	boolean a_received = false;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getACK'\n");
 	#endif
@@ -5211,7 +5211,7 @@ uint8_t sx1276::getACK(uint16_t wait)
 						if( ACK.data[0] == CORRECT_PACKET )
 						{
 							state = 0;
-							#if (sx1276_debug_mode > 0)
+							#if (SX1272_debug_mode > 0)
 								// Printing the received ACK
 								printf("## ACK received:\n");
 								printf("Destination: ");
@@ -5231,7 +5231,7 @@ uint8_t sx1276::getACK(uint16_t wait)
 						else
 						{
 							state = 1;
-							#if (sx1276_debug_mode > 0)
+							#if (SX1272_debug_mode > 0)
 								printf("** N-ACK received **\n");
 								printf("\n");
 							#endif
@@ -5240,7 +5240,7 @@ uint8_t sx1276::getACK(uint16_t wait)
 					else
 					{
 						state = 1;
-						#if (sx1276_debug_mode > 0)
+						#if (SX1272_debug_mode > 0)
 							printf("** ACK length incorrectly received **\n");
 							printf("\n");
 						#endif
@@ -5249,7 +5249,7 @@ uint8_t sx1276::getACK(uint16_t wait)
 				else
 				{
 					state = 1;
-					#if (sx1276_debug_mode > 0)
+					#if (SX1272_debug_mode > 0)
 						printf("** ACK number incorrectly received **\n");
 						printf("\n");
 					#endif
@@ -5258,7 +5258,7 @@ uint8_t sx1276::getACK(uint16_t wait)
 			else
 			{
 				state = 1;
-				#if (sx1276_debug_mode > 0)
+				#if (SX1272_debug_mode > 0)
 					printf("** ACK source incorrectly received **\n");
 					printf("\n");
 				#endif
@@ -5267,7 +5267,7 @@ uint8_t sx1276::getACK(uint16_t wait)
 		else
 		{
 			state = 1;
-			#if (sx1276_debug_mode > 0)
+			#if (SX1272_debug_mode > 0)
 				printf("** ACK destination incorrectly received **\n");
 				printf("\n");
 			#endif
@@ -5276,7 +5276,7 @@ uint8_t sx1276::getACK(uint16_t wait)
 	else
 	{
 		state = 1;
-		#if (sx1276_debug_mode > 0)
+		#if (SX1272_debug_mode > 0)
 			printf("** ACK lost **\n");
 			printf("\n");
 		#endif
@@ -5292,7 +5292,7 @@ uint8_t sx1276::getACK(uint16_t wait)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketMAXTimeoutACKRetries(uint8_t dest, char  *payload)
+uint8_t SX1272::sendPacketMAXTimeoutACKRetries(uint8_t dest, char  *payload)
 {
 	return sendPacketTimeoutACKRetries(dest, payload, MAX_TIMEOUT);
 }
@@ -5304,7 +5304,7 @@ uint8_t sx1276::sendPacketMAXTimeoutACKRetries(uint8_t dest, char  *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketMAXTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint16_t length16)
+uint8_t SX1272::sendPacketMAXTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint16_t length16)
 {
 	return sendPacketTimeoutACKRetries(dest, payload, length16, MAX_TIMEOUT);
 }
@@ -5316,11 +5316,11 @@ uint8_t sx1276::sendPacketMAXTimeoutACKRetries(uint8_t dest, uint8_t *payload, u
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, char *payload)
+uint8_t SX1272::sendPacketTimeoutACKRetries(uint8_t dest, char *payload)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACKRetries'\n");
 	#endif
@@ -5344,11 +5344,11 @@ uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, char *payload)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint16_t length16)
+uint8_t SX1272::sendPacketTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint16_t length16)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACKRetries'\n");
 	#endif
@@ -5373,11 +5373,11 @@ uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, char *payload, uint16_t wait)
+uint8_t SX1272::sendPacketTimeoutACKRetries(uint8_t dest, char *payload, uint16_t wait)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACKRetries'\n");
 	#endif
@@ -5401,11 +5401,11 @@ uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, char *payload, uint16_
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint16_t length16, uint16_t wait)
+uint8_t SX1272::sendPacketTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint16_t length16, uint16_t wait)
 {
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'sendPacketTimeoutACKRetries'\n");
 	#endif
@@ -5429,12 +5429,12 @@ uint8_t sx1276::sendPacketTimeoutACKRetries(uint8_t dest, uint8_t *payload, uint
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
-uint8_t sx1276::getTemp()
+uint8_t SX1272::getTemp()
 {
 	byte st0;
 	uint8_t state = 2;
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'getTemp'\n");
 	#endif
@@ -5461,7 +5461,7 @@ uint8_t sx1276::getTemp()
 	}
 
 
-	#if (sx1276_debug_mode > 1)
+	#if (SX1272_debug_mode > 1)
 		printf("## Temperature is: ");
 		printf("%d", _temp);
 		printf(" ##\n");
@@ -5478,4 +5478,4 @@ uint8_t sx1276::getTemp()
 }
 
 
-sx1276 sx1276 = sx1276();
+SX1272 sx1272 = SX1272();
