@@ -27,6 +27,11 @@ After installing Raspbian Lite on the Raspberry Pi, Clang 8 must be installed. [
 
 ### Compiling & Installation
 #### First Time Compilation
+```
+git clone --recursive https://github.com/Jiuro/NDN_over_LoRa.git
+
+```
+
 These build and installation instructions are based off of [this tutorial](https://named-data.net/doc/NFD/current/INSTALL.html) from Named-Data.net. See the tutorial for more in depth instructions.
 
 Install the dependencies first:
