@@ -255,23 +255,24 @@ enum Representation{
 	BYTE
 };
 
-typedef enum{
+typedef enum {
 	INPUT,
 	OUTPUT
 }Pinmode;
 
-typedef enum{
+typedef enum
+{
 	LOW = 0,
 	HIGH = 1,
 	RISING = 2,
 	FALLING = 3,
 	BOTH = 4
-}Digivalue;
+} Digivalue;
 
 typedef bool boolean;
 typedef unsigned char byte;
 
-struct bcm2835_peripheral{
+struct bcm2835_peripheral {
     unsigned long addr_p;
     int mem_fd;
     void *map;

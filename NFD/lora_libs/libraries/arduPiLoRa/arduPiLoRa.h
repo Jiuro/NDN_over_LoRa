@@ -125,6 +125,9 @@
 #define        REG_FIFO_RX_BYTE_ADDR 			0x25
 #define        REG_MODEM_CONFIG3                0x26  // added for sx1276
 #define        REG_PREAMBLE_LSB_FSK 			0x26
+// added by C. Pham
+#define        REG_MODEM_CONFIG3	  			0x26
+// end
 #define        REG_SYNC_CONFIG	  				0x27
 #define        REG_SYNC_VALUE1	 				0x28
 #define        REG_SYNC_VALUE2	  				0x29
@@ -146,6 +149,9 @@
 #define        REG_DETECTION_THRESHOLD          0x37
 #define        REG_TIMER_RESOL	  				0x38
 #define        REG_TIMER1_COEF	  				0x39
+// added by C. Pham
+#define        REG_SYNC_WORD                    0x39
+//end
 #define        REG_TIMER2_COEF	  				0x3A
 #define        REG_IMAGE_CAL	  				0x3B
 #define        REG_TEMP		  					0x3C
@@ -167,6 +173,45 @@
 #define        REG_FORMER_TEMP	  				0x6C
 #define        REG_BIT_RATE_FRAC	  			0x70
 
+// added by C. Pham
+// copied from LoRaMAC-Node
+/*!
+ * RegImageCal
+ */
+#define RF_IMAGECAL_AUTOIMAGECAL_MASK               0x7F
+#define RF_IMAGECAL_AUTOIMAGECAL_ON                 0x80
+#define RF_IMAGECAL_AUTOIMAGECAL_OFF                0x00  // Default
+
+#define RF_IMAGECAL_IMAGECAL_MASK                   0xBF
+#define RF_IMAGECAL_IMAGECAL_START                  0x40
+
+#define RF_IMAGECAL_IMAGECAL_RUNNING                0x20
+#define RF_IMAGECAL_IMAGECAL_DONE                   0x00  // Default
+
+#define RF_IMAGECAL_TEMPCHANGE_HIGHER               0x08
+#define RF_IMAGECAL_TEMPCHANGE_LOWER                0x00
+
+#define RF_IMAGECAL_TEMPTHRESHOLD_MASK              0xF9
+#define RF_IMAGECAL_TEMPTHRESHOLD_05                0x00
+#define RF_IMAGECAL_TEMPTHRESHOLD_10                0x02  // Default
+#define RF_IMAGECAL_TEMPTHRESHOLD_15                0x04
+#define RF_IMAGECAL_TEMPTHRESHOLD_20                0x06
+
+#define RF_IMAGECAL_TEMPMONITOR_MASK                0xFE
+#define RF_IMAGECAL_TEMPMONITOR_ON                  0x00 // Default
+#define RF_IMAGECAL_TEMPMONITOR_OFF                 0x01
+
+// added by C. Pham
+// The crystal oscillator frequency of the module
+#define RH_LORA_FXOSC 32000000.0
+
+// The Frequency Synthesizer step = RH_LORA_FXOSC / 2^^19
+#define RH_LORA_FCONVERT  (524288 / RH_LORA_FXOSC)
+
+// Frf = frf(Hz)*2^19/RH_LORA_FXOSC
+
+/////
+
 //FREQUENCY CHANNELS:
 const uint32_t CH_10_868 = 0xD84CCC; // channel 10, central freq = 865.20MHz
 const uint32_t CH_11_868 = 0xD86000; // channel 11, central freq = 865.50MHz
@@ -175,7 +220,11 @@ const uint32_t CH_13_868 = 0xD88666; // channel 13, central freq = 866.10MHz
 const uint32_t CH_14_868 = 0xD89999; // channel 14, central freq = 866.40MHz
 const uint32_t CH_15_868 = 0xD8ACCC; // channel 15, central freq = 866.70MHz
 const uint32_t CH_16_868 = 0xD8C000; // channel 16, central freq = 867.00MHz
-const uint32_t CH_17_868 = 0xD90000; // channel 16, central freq = 868.00MHz
+const uint32_t CH_17_868 = 0xD90000; // channel 17, central freq = 868.00MHz
+
+// added by C. Pham
+const uint32_t CH_18_868 = 0xD90666; // 868.1MHz for LoRaWAN test
+
 const uint32_t CH_00_900 = 0xE1C51E; // channel 00, central freq = 903.08MHz
 const uint32_t CH_01_900 = 0xE24F5C; // channel 01, central freq = 905.24MHz
 const uint32_t CH_02_900 = 0xE2D999; // channel 02, central freq = 907.40MHz
@@ -191,6 +240,10 @@ const uint32_t CH_11_900 = 0xE7B5C2; // channel 11, central freq = 926.84MHz
 const uint32_t CH_12_900 = 0xE4C000; // default channel 915MHz, the module is configured with it
 
 //LORA BANDWIDTH:
+// modified by C. Pham
+const uint8_t SX1272_BW_125 = 0x00;
+const uint8_t SX1272_BW_250 = 0x01;
+const uint8_t SX1272_BW_500 = 0x02;
 // Modified By Ahmed Awad as new BW are available in the SX1276
 	
 const uint16_t BW_7_8 = 0x0000;
@@ -203,6 +256,19 @@ const uint16_t BW_62_5 = 0x0110;
 const uint16_t BW_125 = 0x0111;
 const uint16_t BW_250 = 0x1000;
 const uint16_t BW_500 = 0x1001;
+// use the following constants with setBW()
+const uint8_t BW_7_8 = 0x00;
+const uint8_t BW_10_4 = 0x01;
+const uint8_t BW_15_6 = 0x02;
+const uint8_t BW_20_8 = 0x03;
+const uint8_t BW_31_25 = 0x04;
+const uint8_t BW_41_7 = 0x05;
+const uint8_t BW_62_5 = 0x06;
+const uint8_t BW_125 = 0x07;
+const uint8_t BW_250 = 0x08;
+const uint8_t BW_500 = 0x09;
+// end
+
 const double SignalBwLog[] =
 {
     5.0969100130080564143587833158265,
@@ -230,6 +296,14 @@ const uint8_t LORA_SLEEP_MODE = 0x80;
 const uint8_t LORA_STANDBY_MODE = 0x81;
 const uint8_t LORA_TX_MODE = 0x83;
 const uint8_t LORA_RX_MODE = 0x85;
+
+// added by C. Pham
+const uint8_t LORA_CAD_MODE = 0x87;
+#define LNA_MAX_GAIN                0x23
+#define LNA_OFF_GAIN                0x00
+#define LNA_LOW_GAIN		    	0x20
+//end
+
 const uint8_t LORA_STANDBY_FSK_REGS_MODE = 0xC1;
 
 //FSK MODES:
@@ -251,8 +325,20 @@ const uint8_t MAX_LENGTH = 255;
 const uint8_t MAX_PAYLOAD = 251;
 const uint8_t MAX_LENGTH_FSK = 64;
 const uint8_t MAX_PAYLOAD_FSK = 60;
-const uint8_t ACK_LENGTH = 5;
-const uint8_t OFFSET_PAYLOADLENGTH = 5;
+//const uint8_t ACK_LENGTH = 5; //Modied my Camden
+//const uint8_t OFFSET_PAYLOADLENGTH = 5; //modified by Camden
+//modified by C. Pham, 7 instead of 5 because we added a type field which should be PKT_TYPE_ACK and the SNR
+const uint8_t ACK_LENGTH = 7;
+// added by C. Pham
+#ifdef W_NET_KEY
+const uint8_t NET_KEY_LENGTH=2;
+const uint8_t OFFSET_PAYLOADLENGTH = 4+NET_KEY_LENGTH;
+const uint8_t net_key_0 = 0x12;
+const uint8_t net_key_1 = 0x34;
+#else
+// modified by C. Pham to remove the retry field
+const uint8_t OFFSET_PAYLOADLENGTH = 4;
+#endif
 const uint8_t OFFSET_RSSI = 137;
 const uint8_t NOISE_FIGURE = 6.0;
 const uint8_t NOISE_ABSOLUTE_ZERO = 174.0;
@@ -262,16 +348,39 @@ const uint8_t MAX_RETRIES = 5;
 const uint8_t CORRECT_PACKET = 0;
 const uint8_t INCORRECT_PACKET = 1;
 
+// added by C. Pham
+// Packet type definition
+
+#define PKT_TYPE_MASK   0xF0
+#define PKT_FLAG_MASK   0x0F
+
+#define PKT_TYPE_DATA   0x10
+#define PKT_TYPE_ACK    0x20
+
+#define PKT_FLAG_ACK_REQ            0x08
+#define PKT_FLAG_DATA_ENCRYPTED     0x04
+#define PKT_FLAG_DATA_WAPPKEY       0x02
+#define PKT_FLAG_DATA_ISBINARY      0x01
 
 //! Structure :
 /*!
  */
 struct pack
 {
+	        // added by C. Pham
+#ifdef W_NET_KEY
+        uint8_t netkey[NET_KEY_LENGTH];
+#endif
 	//! Structure Variable : Packet destination
 	/*!
  	*/
 	uint8_t dst;
+
+// added by C. Pham
+    //! Structure Variable : Packet type
+    /*!
+    */
+    uint8_t type;
 
 	//! Structure Variable : Packet source
 	/*!
@@ -333,6 +442,22 @@ public:
 		_packetNumber = 0;
 		_reception = CORRECT_PACKET;
 		_retries = 0;
+		// added by C. Pham
+        _defaultSyncWord=0x12;
+        _rawFormat=false;
+        _extendedIFS=true;
+        _RSSIonSend=true;
+        // disabled by default
+        _enableCarrierSense=false;
+        // DIFS by default
+        _send_cad_number=9;
+#ifdef W_REQUESTED_ACK
+        _requestACK = 0;
+#endif
+#ifdef W_NET_KEY
+        _my_netkey[0] = net_key_0;
+        _my_netkey[1] = net_key_1;
+#endif
 		_maxRetries = 3;
 		packet_sent.retry = _retries;
 	};
@@ -1116,6 +1241,7 @@ public:
   	/*!
    	*/
 	uint16_t _bandwidth;
+	uint8_t _bandwidth;
 
 	//! Variable : coding rate configured in LoRa mode.
 	//!    codingRate = 001  --> CR = 4/5
