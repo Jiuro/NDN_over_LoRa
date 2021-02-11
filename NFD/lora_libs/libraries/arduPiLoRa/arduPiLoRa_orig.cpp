@@ -83,12 +83,6 @@ uint8_t SX1272::ON()
   // set LoRa mode
   state = setLORA();
 
-#ifdef W_INITIALIZATION
-    // CAUTION
-    // doing initialization as proposed by Libelium seems not to work for the SX1276
-    // so we decided to leave the default value of the SX127x, then configure the radio when
-    // setting to LoRa mode
-
 	//Set initialization values
 	writeRegister(0x0,0x0);
 	writeRegister(0x1,0x81);
@@ -99,8 +93,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x6,0xD8);
 	writeRegister(0x7,0x99);
 	writeRegister(0x8,0x99);
-	//writeRegister(0x9,0x0);
-	writeRegister(0x9,0x40);
+	writeRegister(0x9,0x0);
 	writeRegister(0xA,0x9);
 	writeRegister(0xB,0x3B);
 	writeRegister(0xC,0x23);
@@ -120,12 +113,8 @@ uint8_t SX1272::ON()
 	writeRegister(0x1A,0x0);
 	writeRegister(0x1B,0x0);
 	writeRegister(0x1C,0x0);
-	//writeRegister(0x1D,0x4A);
-	//writeRegister(0x1E,0x97);
-	writeRegister(0x1D,0x82);
-        // 1000 0 1 11
-        // SF=9 TxContinuous_off RxPayloadCrcOn_on SymbTimeOut
-    writeRegister(0x1E,0x97);
+	writeRegister(0x1D,0x4A);
+	writeRegister(0x1E,0x97);
 	writeRegister(0x1F,0xFF);
 	writeRegister(0x20,0x0);
 	writeRegister(0x21,0x8);
@@ -133,8 +122,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x23,0xFF);
 	writeRegister(0x24,0x0);
 	writeRegister(0x25,0x0);
-	//writeRegister(0x26,0x0);
-	writeRegister(0x26,0x04);
+	writeRegister(0x26,0x0);
 	writeRegister(0x27,0x0);
 	writeRegister(0x28,0x0);
 	writeRegister(0x29,0x0);
@@ -162,7 +150,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x3F,0x0);
 	writeRegister(0x40,0x0);
 	writeRegister(0x41,0x0);
-	//writeRegister(0x42,0x22);
+	writeRegister(0x42,0x22);
 	
   return state;
 }
@@ -316,28 +304,15 @@ uint8_t SX1272::setLORA()
 		printf("Starting 'setLORA'\n");
 	#endif
 
-// modified by C. Pham
-    uint8_t retry=0;
+	writeRegister(REG_OP_MODE, FSK_SLEEP_MODE);    // Sleep mode (mandatory to set LoRa mode)
+	writeRegister(REG_OP_MODE, LORA_SLEEP_MODE);    // LoRa sleep mode
+	writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);	// LoRa standby mode
 
-    do {
-        delay(200);
-		writeRegister(REG_OP_MODE, FSK_SLEEP_MODE);    // Sleep mode (mandatory to set LoRa mode)
-		writeRegister(REG_OP_MODE, LORA_SLEEP_MODE);    // LoRa sleep mode
-		writeRegister(REG_OP_MODE, LORA_STANDBY_MODE); // LoRa standby mode
-		delay(50+retry*10);
-        st0 = readRegister(REG_OP_MODE);
-        printf("...\n");
+	writeRegister(REG_MAX_PAYLOAD_LENGTH,MAX_LENGTH);
 
-		writeRegister(REG_MAX_PAYLOAD_LENGTH,MAX_LENGTH);
-		if ((retry % 2)==0)
-            if (retry==20)
-                retry=0;
-            else
-                retry++;
-	} while (st0!=LORA_STANDBY_MODE);	// LoRa standby mode
 	delayMicroseconds(100);
 
-	//st0 = readRegister(REG_OP_MODE);	// Reading config mode
+	st0 = readRegister(REG_OP_MODE);	// Reading config mode
 	if( st0 == LORA_STANDBY_MODE )
 	{ // LoRa mode
 		_modem = LORA;
@@ -372,7 +347,6 @@ uint8_t SX1272::setFSK()
     byte st0;
     byte config1;
 
-printf("Warning: FSK has not been tested on SX1276!\n");
 	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setFSK'\n");
@@ -442,10 +416,8 @@ uint8_t SX1272::getMode()
 	  setLORA();					// Setting LoRa mode
   }
   value = readRegister(REG_MODEM_CONFIG1);
-  //_bandwidth = (value >> 6);  //commented for SX1276 			// Storing 2 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
-  _bandwidth = (value >> 4);   			// Storing 4 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
-  //_codingRate = (value >> 3) & 0x07;  //commented for SX1276		// Storing third, forth and fifth bits from
-  _codingRate = (value >> 1) & 0x07;  		// Storing 3-1 bits REG_MODEM_CONFIG1 (=_codingRate)
+  _bandwidth = (value >> 6);   			// Storing 2 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
+  _codingRate = (value >> 3) & 0x07;  		// Storing third, forth and fifth bits from
   value = readRegister(REG_MODEM_CONFIG2);			// REG_MODEM_CONFIG1 (=_codingRate)
   _spreadingFactor = (value >> 4) & 0x0F; 	// Storing 4 MSB from REG_MODEM_CONFIG2 (=_spreadingFactor)
   state = 1;
@@ -1418,8 +1390,7 @@ int8_t	SX1272::getBW()
   else
   {
 	  // take out bits 7-6 from REG_MODEM_CONFIG1 indicates _bandwidth
-	  //config1 = (readRegister(REG_MODEM_CONFIG1)) >> 6;
-	  config1 = (readRegister(REG_MODEM_CONFIG1)) >> 4;
+	  config1 = (readRegister(REG_MODEM_CONFIG1)) >> 6;
 	  _bandwidth = config1;
 
 	  if( (config1 == _bandwidth) && isBW(_bandwidth) )
@@ -1478,32 +1449,23 @@ int8_t	SX1272::setBW(uint16_t band)
   config1 = (readRegister(REG_MODEM_CONFIG1));	// Save config1 to modify only the BW
   switch(band)
   {
-	  config1 = config1 & 0B00001111;	// clears bits 7 - 4 from REG_MODEM_CONFIG1
-	  case BW_125:
-	    //config1 = config1 & 0B00111111;	// clears bits 7 & 6 from REG_MODEM_CONFIG1
-					config1 = config1 | 0B01110000;
+	  case BW_125:  config1 = config1 & 0B00111111;	// clears bits 7 & 6 from REG_MODEM_CONFIG1
 					getSF();
-					if( _spreadingFactor == 11 || _spreadingFactor == 12)
+					if( _spreadingFactor == 11 )
 					{ // LowDataRateOptimize (Mandatory with BW_125 if SF_11)
-						//config1 = config1 | 0B00000001;
-						config1 = config1 | 0B00001000;
+						config1 = config1 | 0B00000001;
 					}
 					if( _spreadingFactor == 12 )
 					{ // LowDataRateOptimize (Mandatory with BW_125 if SF_12)
-						//config1 = config1 | 0B00000001;
-						config1 = config1 | 0B00001000;
+						config1 = config1 | 0B00000001;
 					}
 					break;
-	  case BW_250:
-	  	config1 = config1 | 0B10000000;
-	    //config1 = config1 & 0B01111111;	// clears bit 7 from REG_MODEM_CONFIG1
-		//config1 = config1 | 0B01000000;	// sets bit 6 from REG_MODEM_CONFIG1
+	  case BW_250:  config1 = config1 & 0B01111111;	// clears bit 7 from REG_MODEM_CONFIG1
+					config1 = config1 | 0B01000000;	// sets bit 6 from REG_MODEM_CONFIG1
 					break;
-	  case BW_500:
-	  	//config1 = config1 & 0B10111111;	//clears bit 6 from REG_MODEM_CONFIG1
-		//config1 = config1 | 0B10000000;	//sets bit 7 from REG_MODEM_CONFIG1
-		config1 = config1 | 0B10010000;
-		break;
+	  case BW_500:  config1 = config1 & 0B10111111;	//clears bit 6 from REG_MODEM_CONFIG1
+					config1 = config1 | 0B10000000;	//sets bit 7 from REG_MODEM_CONFIG1
+					break;
   }
   writeRegister(REG_MODEM_CONFIG1,config1);		// Update config1
 
@@ -1690,37 +1652,21 @@ int8_t	SX1272::setCR(uint8_t cod)
   writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);		// Set Standby mode to write in registers
 
   config1 = readRegister(REG_MODEM_CONFIG1);	// Save config1 to modify only the CR
-//  switch(cod)
-//  {
-//	 case CR_5: config1 = config1 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG1
-//				config1 = config1 | 0B00001000;	// sets bit 3 from REG_MODEM_CONFIG1
-//				break;
-//	 case CR_6: config1 = config1 & 0B11010111;	// clears bits 5 & 3 from REG_MODEM_CONFIG1
-//				config1 = config1 | 0B00010000;	// sets bit 4 from REG_MODEM_CONFIG1
-//				break;
-//	 case CR_7: config1 = config1 & 0B11011111;	// clears bit 5 from REG_MODEM_CONFIG1
-//				config1 = config1 | 0B00011000;	// sets bits 4 & 3 from REG_MODEM_CONFIG1
-//			break;
-//	 case CR_8: config1 = config1 & 0B11100111;	// clears bits 4 & 3 from REG_MODEM_CONFIG1
-//				config1 = config1 | 0B00100000;	// sets bit 5 from REG_MODEM_CONFIG1
-//				break;
-//  }
-  config1 = config1 & 0B11110001;	// clears bits 3 - 1 from REG_MODEM_CONFIG1
-        switch(cod)
-        {
-        case CR_5:
-            config1 = config1 | 0B00000010;
-            break;
-        case CR_6:
-            config1 = config1 | 0B00000100;
-            break;
-        case CR_7:
-            config1 = config1 | 0B00000110;
-            break;
-        case CR_8:
-            config1 = config1 | 0B00001000;
-            break;
-		}
+  switch(cod)
+  {
+	 case CR_5: config1 = config1 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG1
+				config1 = config1 | 0B00001000;	// sets bit 3 from REG_MODEM_CONFIG1
+				break;
+	 case CR_6: config1 = config1 & 0B11010111;	// clears bits 5 & 3 from REG_MODEM_CONFIG1
+				config1 = config1 | 0B00010000;	// sets bit 4 from REG_MODEM_CONFIG1
+				break;
+	 case CR_7: config1 = config1 & 0B11011111;	// clears bit 5 from REG_MODEM_CONFIG1
+				config1 = config1 | 0B00011000;	// sets bits 4 & 3 from REG_MODEM_CONFIG1
+			break;
+	 case CR_8: config1 = config1 & 0B11100111;	// clears bits 4 & 3 from REG_MODEM_CONFIG1
+				config1 = config1 | 0B00100000;	// sets bit 5 from REG_MODEM_CONFIG1
+				break;
+  }
   writeRegister(REG_MODEM_CONFIG1, config1);		// Update config1
 
   delayMicroseconds(100);

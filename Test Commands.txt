@@ -1,0 +1,9 @@
+sudo nfd start
+
+nfdc face create lora://1-2
+
+nfdc route add /ndn <faceid>
+
+echo "test" | ndnpoke -x 10000 /ndn
+
+ndnpeek -pf -l 10000 /ndn
