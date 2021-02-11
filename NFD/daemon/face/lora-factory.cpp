@@ -149,7 +149,7 @@ LoRaFactory::setup(){
 	printf("\n");
 
   // Select output power (Max, High or Low)
-  e = sx1272.setPower('H');
+  e = sx1272.setPower('M');
   printf(e);
 	printf("\n");
 
