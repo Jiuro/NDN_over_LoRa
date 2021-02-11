@@ -74,6 +74,36 @@ uint8_t SX1272::ON()
   //Set data mode
   SPI.setDataMode(BCM2835_SPI_MODE0);
   delayMicroseconds(100);
+
+  pinMode(SX1272_RST,OUTPUT);
+    digitalWrite(SX1272_RST,HIGH);
+    delay(100);
+    digitalWrite(SX1272_RST,LOW);
+    delay(100);
+
+    // from single_chan_pkt_fwd by Thomas Telkamp
+    uint8_t version = readRegister(REG_VERSION);
+
+    if (version == 0x22) {
+        // sx1272
+        printf("SX1272 detected, starting.\n");
+        _board = SX1272Chip;
+    } else {
+        // sx1276?
+        digitalWrite(SX1272_RST, LOW);
+        delay(100);
+        digitalWrite(SX1272_RST, HIGH);
+        delay(100);
+        version = readRegister(REG_VERSION);
+        if (version == 0x12) {
+            // sx1276
+            printf("SX1276 detected, starting.\n");
+            _board = SX1276Chip;
+        } else {
+            printf("Unrecognized transceiver.\n");
+        }
+    }
+    // end from single_chan_pkt_fwd by Thomas Telkamp
   setMaxCurrent(0x1B);
   #if (SX1272_debug_mode > 1)
 	  printf("## Setting ON with maximum current supply ##\n");
