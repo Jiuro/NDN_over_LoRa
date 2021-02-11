@@ -42,6 +42,9 @@
  *****************************************************************************/
 #define SX1272_RST  7
 
+#define SX1272Chip  0
+#define SX1276Chip  1
+
 #define SX1272_debug_mode 1
 
 #define SX1272_SS 10
