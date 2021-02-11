@@ -70,7 +70,7 @@ sudo ./waf install
 ```
 Copy the modified NFD configuration file from the root directory to the correct location:
 ```
-sudo cp nfd.conf /usr/local/etc/ndn/nfd.conf
+cp nfd.conf /usr/local/etc/ndn/nfd.conf
 ```
 
 Finally, compile and install ndn-tools. The version provided in the `ndn-tools` folder has not been modified so a new version may be installed from [https://github.com/named-data/ndn-tools](https://github.com/named-data/ndn-tools) by following the instructions posted there. However the `ndn-tools` folder contains a tested working version and can be compiled and installed as follows:
