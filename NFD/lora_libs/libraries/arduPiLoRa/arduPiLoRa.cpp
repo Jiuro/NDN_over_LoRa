@@ -42,10 +42,10 @@ uint8_t SX1272::ON()
 
   uint8_t state = 2;
 
-  #if (SX1272_debug_mode > 1)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'ON'\n");
-  #endif
+//  #endif
 
   // Inital Reset Sequence
 
@@ -2045,10 +2045,10 @@ int8_t SX1272::setPower(char p)
   if( value == _power )
   {
 	  state = 0;
-	  #if (SX1272_debug_mode > 1)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("## Output power has been successfully set ##\n");
 		  printf("\n");
-	  #endif
+	//  #endif
   }
   else
   {

@@ -135,21 +135,33 @@ LoRaFactory::setup(){
 
   // Set header
   e = sx1272.setHeaderON();
+  printf(e);
+	printf("\n");
 
   // Select frequency channel
-  e = sx1272.setChannel(CH_00_900);
+  e = sx1272.setChannel(CH_12_900);
+  printf(e);
+	printf("\n");
 
   // Set CRC
   e = sx1272.setCRC_ON();
+  printf(e);
+	printf("\n");
 
   // Select output power (Max, High or Low)
   e = sx1272.setPower('H');
+  printf(e);
+	printf("\n");
 
   // Set the node address
   e = sx1272.setNodeAddress(3);
+  printf(e);
+	printf("\n");
 
   // Set the LoRa into receive mode by default
   e = sx1272.receive();
+  printf(e);
+	printf("\n");
   if (e)
     NFD_LOG_INFO("Unable to enter receive mode");
 
