@@ -1058,6 +1058,8 @@ public:
 	*/
 	uint8_t getTemp();
 
+	//added by C.EWELL
+	int8_t	getchip();
 
 	/// Variables /////////////////////////////////////////////////////////////
 
