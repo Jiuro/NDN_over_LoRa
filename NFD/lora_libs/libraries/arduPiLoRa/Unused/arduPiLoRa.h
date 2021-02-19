@@ -40,10 +40,6 @@
 /******************************************************************************
  * Definitions & Declarations
  *****************************************************************************/
-#define SX1272_RST  7
-
-#define SX1272Chip  0
-#define SX1276Chip  1
 
 #define SX1272_debug_mode 1
 
@@ -119,9 +115,6 @@
 #define        REG_PREAMBLE_MSB_FSK 			0x25
 #define        REG_FIFO_RX_BYTE_ADDR 			0x25
 #define        REG_PREAMBLE_LSB_FSK 			0x26
-// added by C. Pham
-#define        REG_MODEM_CONFIG3	  			0x26
-// end
 #define        REG_SYNC_CONFIG	  				0x27
 #define        REG_SYNC_VALUE1	 				0x28
 #define        REG_SYNC_VALUE2	  				0x29
@@ -216,8 +209,8 @@ const uint8_t SF_12 = 0x0C;
 //LORA MODES:
 const uint8_t LORA_SLEEP_MODE = 0x80;
 const uint8_t LORA_STANDBY_MODE = 0x81;
-const uint8_t LORA_TX_MODE = 0x83; // TX mode 0b10000011
-const uint8_t LORA_RX_MODE = 0x85; //Continuous RX Mode 0b10000101
+const uint8_t LORA_TX_MODE = 0x83;
+const uint8_t LORA_RX_MODE = 0x85;
 const uint8_t LORA_STANDBY_FSK_REGS_MODE = 0xC1;
 
 //FSK MODES:
@@ -1067,23 +1060,6 @@ public:
 	//!    bandwidth = 10  --> BW = 500KHz
   	/*!
    	*/
-
-	   // SX1272 or SX1276?
-    uint8_t _board;
-    uint8_t _syncWord;
-    uint8_t _defaultSyncWord;
-    unsigned long _starttime;
-    unsigned long _stoptime;
-    unsigned long _startDoCad;
-    unsigned long _endDoCad;
-    uint8_t _loraMode;
-    uint8_t _send_cad_number;
-    bool _extendedIFS;
-    bool _RSSIonSend;
-    bool _enableCarrierSense;
-    bool _rawFormat;
-    int8_t _rcv_snr_in_ack;
-	
 	uint8_t _bandwidth;
 
 	//! Variable : coding rate configured in LoRa mode.

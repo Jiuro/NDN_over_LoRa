@@ -216,8 +216,8 @@ const uint8_t SF_12 = 0x0C;
 //LORA MODES:
 const uint8_t LORA_SLEEP_MODE = 0x80;
 const uint8_t LORA_STANDBY_MODE = 0x81;
-const uint8_t LORA_TX_MODE = 0x83;
-const uint8_t LORA_RX_MODE = 0x85;
+const uint8_t LORA_TX_MODE = 0x83; // TX mode 0b10000011
+const uint8_t LORA_RX_MODE = 0x85; //Continuous RX Mode 0b10000101
 const uint8_t LORA_STANDBY_FSK_REGS_MODE = 0xC1;
 
 //FSK MODES:

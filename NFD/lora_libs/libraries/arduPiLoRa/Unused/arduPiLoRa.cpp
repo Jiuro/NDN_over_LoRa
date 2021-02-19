@@ -42,10 +42,10 @@ uint8_t SX1272::ON()
 
   uint8_t state = 2;
 
-#if (SX1272_debug_mode == 1)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'ON'\n");
-#endif
+//  #endif
 
   // Inital Reset Sequence
 
@@ -74,36 +74,6 @@ uint8_t SX1272::ON()
   //Set data mode
   SPI.setDataMode(BCM2835_SPI_MODE0);
   delayMicroseconds(100);
-
-  pinMode(SX1272_RST,OUTPUT);
-    digitalWrite(SX1272_RST,HIGH);
-    delay(100);
-    digitalWrite(SX1272_RST,LOW);
-    delay(100);
-
-    // from single_chan_pkt_fwd by Thomas Telkamp
-    uint8_t version = readRegister(REG_VERSION);
-
-    if (version == 0x22) {
-        // sx1272
-        printf("SX1272 detected, starting.\n");
-        _board = SX1272Chip;
-    } else {
-        // sx1276?
-        digitalWrite(SX1272_RST, LOW);
-        delay(100);
-        digitalWrite(SX1272_RST, HIGH);
-        delay(100);
-        version = readRegister(REG_VERSION);
-        if (version == 0x12) {
-            // sx1276
-            printf("SX1276 detected, starting.\n");
-            _board = SX1276Chip;
-        } else {
-            printf("Unrecognized transceiver.\n");
-        }
-    }
-    // end from single_chan_pkt_fwd by Thomas Telkamp
   setMaxCurrent(0x1B);
   #if (SX1272_debug_mode > 1)
 	  printf("## Setting ON with maximum current supply ##\n");
@@ -129,12 +99,8 @@ uint8_t SX1272::ON()
 	writeRegister(0x6,0xD8);
 	writeRegister(0x7,0x99);
 	writeRegister(0x8,0x99);
-	if (_board==SX1272Chip){
-		writeRegister(0x9,0x0);
-	}
-	else {
-		writeRegister(0x9,0x40);
-	}
+	//writeRegister(0x9,0x0);
+	writeRegister(0x9,0x40);
 	writeRegister(0xA,0x9);
 	writeRegister(0xB,0x3B);
 	writeRegister(0xC,0x23);
@@ -154,12 +120,9 @@ uint8_t SX1272::ON()
 	writeRegister(0x1A,0x0);
 	writeRegister(0x1B,0x0);
 	writeRegister(0x1C,0x0);
-	if (_board==SX1272Chip){
-		writeRegister(0x1D,0x4A);
-	}
-	else { //SX1276
-		writeRegister(0x1D,0x82);
-	}
+	//writeRegister(0x1D,0x4A);
+	//writeRegister(0x1E,0x97);
+	writeRegister(0x1D,0x82);
         // 1000 0 1 11
         // SF=9 TxContinuous_off RxPayloadCrcOn_on SymbTimeOut
     writeRegister(0x1E,0x97);
@@ -170,13 +133,8 @@ uint8_t SX1272::ON()
 	writeRegister(0x23,0xFF);
 	writeRegister(0x24,0x0);
 	writeRegister(0x25,0x0);
-	//Modified by Camden
-	if (_board==SX1272Chip){
-		writeRegister(0x26,0x0);
-	}
-	else { //SX1276
-		writeRegister(0x26,0x04);
-	}
+	//writeRegister(0x26,0x0);
+	writeRegister(0x26,0x04);
 	writeRegister(0x27,0x0);
 	writeRegister(0x28,0x0);
 	writeRegister(0x29,0x0);
@@ -204,10 +162,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x3F,0x0);
 	writeRegister(0x40,0x0);
 	writeRegister(0x41,0x0);
-	//Modified by Camden
-	if (_board==SX1272Chip){
-		writeRegister(0x42,0x22);
-	}
+	//writeRegister(0x42,0x22);
 	#endif
 	
   return state;
@@ -488,15 +443,10 @@ uint8_t SX1272::getMode()
 	  setLORA();					// Setting LoRa mode
   }
   value = readRegister(REG_MODEM_CONFIG1);
-  //Modified by Camden Ewell
-	if (_board==SX1272Chip){
-		_bandwidth = (value >> 6);   			// Storing 2 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
-  		_codingRate = (value >> 3) & 0x07;  		// Storing third, forth and fifth bits from
-	}
-	else{ //SX1276
-  		_bandwidth = (value >> 4);   			// Storing 4 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
-  		_codingRate = (value >> 1) & 0x07;  		// Storing 3-1 bits REG_MODEM_CONFIG1 (=_codingRate)
-	}
+  //_bandwidth = (value >> 6);  //commented for SX1276 			// Storing 2 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
+  _bandwidth = (value >> 4);   			// Storing 4 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
+  //_codingRate = (value >> 3) & 0x07;  //commented for SX1276		// Storing third, forth and fifth bits from
+  _codingRate = (value >> 1) & 0x07;  		// Storing 3-1 bits REG_MODEM_CONFIG1 (=_codingRate)
   value = readRegister(REG_MODEM_CONFIG2);			// REG_MODEM_CONFIG1 (=_codingRate)
   _spreadingFactor = (value >> 4) & 0x0F; 	// Storing 4 MSB from REG_MODEM_CONFIG2 (=_spreadingFactor)
   state = 1;
@@ -836,10 +786,10 @@ int8_t	SX1272::setHeaderON()
   int8_t state = 2;
   byte config1;
 
-  #if (SX1272_debug_mode > 0)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setHeaderON'\n");
-  #endif
+//  #endif
 
   if( _modem == FSK )
   {
@@ -871,10 +821,10 @@ int8_t	SX1272::setHeaderON()
 		{
 			state = 0;
 			_header = HEADER_ON;
-			#if (SX1272_debug_mode > 0)
+		//	#if (SX1272_debug_mode > 1)
 				printf("## Header has been activated ##\n");
 				printf("\n");
-			#endif
+		//	#endif
 		}
 		else
 		{
@@ -1030,10 +980,10 @@ uint8_t	SX1272::setCRC_ON()
   uint8_t state = 2;
   byte config1;
 
-  #if (SX1272_debug_mode > 0)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setCRC_ON'\n");
-  #endif
+//  #endif
 
   if( _modem == LORA )
   { // LORA mode
@@ -1048,10 +998,10 @@ uint8_t	SX1272::setCRC_ON()
 	{ // take out bit 1 from REG_MODEM_CONFIG1 indicates RxPayloadCrcOn
 		state = 0;
 		_CRC = CRC_ON;
-		#if (SX1272_debug_mode > 0)
+	//	#if (SX1272_debug_mode > 1)
 			printf("## CRC has been activated ##\n");
 			printf("\n");
-		#endif
+	//	#endif
 	}
   }
   else
@@ -1067,19 +1017,19 @@ uint8_t	SX1272::setCRC_ON()
 	{ // take out bit 4 from REG_PACKET_CONFIG1 indicates CrcOn
 		state = 0;
 		_CRC = CRC_ON;
-		#if (SX1272_debug_mode > 0)
+	//	#if (SX1272_debug_mode > 1)
 			printf("## CRC has been activated ##, FSK\n");
 			printf("\n");
-		#endif
+	//	#endif
 	}
   }
   if( state != 0 )
   {
 	  state = 1;
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("** There has been an error while setting CRC ON **\n");
 		  printf("\n");
-	  #endif
+	 // #endif
   }
   return state;
 }
@@ -1243,19 +1193,19 @@ uint8_t	SX1272::setSF(uint8_t spr)
   byte config1;
   byte config2;
 
-  #if (SX1272_debug_mode > 0)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setSF'\n");
-  #endif
+//  #endif
 
   st0 = readRegister(REG_OP_MODE);	// Save the previous status
 
   if( _modem == FSK )
   {
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("## Notice that FSK hasn't Spreading Factor parameter, ");
 		  printf("so you are configuring it in LoRa mode ##\n");
-	  #endif
+	//  #endif
 	  state = setLORA();				// Setting LoRa mode
   }
   else
@@ -1284,31 +1234,17 @@ uint8_t	SX1272::setSF(uint8_t spr)
 		case SF_11:	config2 = config2 & 0B10111111;	// clears bit 6 from REG_MODEM_CONFIG2
 					config2 = config2 | 0B10110000;	// sets bits 7, 5 & 4 from REG_MODEM_CONFIG2
 					getBW();
-					// modified by C. Pham
-            if( _bandwidth == BW_125)
-            { // LowDataRateOptimize (Mandatory with SF_11 if BW_125)
-                if (_board==SX1272Chip)
-                    config1 = config1 | 0B00000001;
-                else {
-                    byte config3=readRegister(REG_MODEM_CONFIG3);
-                    config3 = config3 | 0B00001000;
-                    writeRegister(REG_MODEM_CONFIG3,config3);
-                }
-            }
-            break;
-        case SF_12: config2 = config2 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG2
-            config2 = config2 | 0B11000000;	// sets bits 7 & 6 from REG_MODEM_CONFIG2
-            if( _bandwidth == BW_125)
-            { // LowDataRateOptimize (Mandatory with SF_12 if BW_125)
-                // modified by C. Pham
-                if (_board==SX1272Chip)
-                    config1 = config1 | 0B00000001;
-                else {
-                    byte config3=readRegister(REG_MODEM_CONFIG3);
-                    config3 = config3 | 0B00001000;
-                    writeRegister(REG_MODEM_CONFIG3,config3);
-                }
-            }
+					if( _bandwidth == BW_125 )
+					{ // LowDataRateOptimize (Mandatory with SF_11 if BW_125)
+						config1 = config1 | 0B00000001;
+					}
+					break;
+		case SF_12: config2 = config2 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG2
+					config2 = config2 | 0B11000000;	// sets bits 7 & 6 from REG_MODEM_CONFIG2
+					if( _bandwidth == BW_125 )
+					{ // LowDataRateOptimize (Mandatory with SF_12 if BW_125)
+						config1 = config1 | 0B00000001;
+					}
 					break;
 	}
 
@@ -1335,25 +1271,7 @@ uint8_t	SX1272::setSF(uint8_t spr)
     }
  
     // sets bit 2-0 (AgcAutoOn and SymbTimout) for any SF value
-    // added by C. Pham
-        if (_board==SX1272Chip) {
-            // comment by C. Pham
-            // bit 9:8 of SymbTimeout are then 11
-            // single_chan_pkt_fwd uses 00 and then 00001000
-            // why?
-            // sets bit 2-0 (AgcAutoOn and SymbTimout) for any SF value
-            config2 = config2 | 0B00000111;
-            // modified by C. Pham
-            //config2 = config2 | 0B00000100;
-            writeRegister(REG_MODEM_CONFIG1, config1);		// Update config1
-        }
-        else {
-            // set the AgcAutoOn in bit 2 of REG_MODEM_CONFIG3
-            uint8_t config3 = (readRegister(REG_MODEM_CONFIG3));
-            config3=config3 | 0B00000100;
-            writeRegister(REG_MODEM_CONFIG3, config3);
-        }
-	//config2 = config2 | 0B00000111; 
+    config2 = config2 | 0B00000111; 
 
 
 
@@ -1362,80 +1280,59 @@ uint8_t	SX1272::setSF(uint8_t spr)
 
 	delayMicroseconds(100);
 
-	// added by C. Pham
-        byte configAgc;
-        uint8_t theLDRBit;
-
-        if (_board==SX1272Chip) {
-            config1 = (readRegister(REG_MODEM_CONFIG1));	// Save config1 to check update
-            config2 = (readRegister(REG_MODEM_CONFIG2));	// Save config2 to check update
-            // comment by C. Pham
-            // (config2 >> 4) ---> take out bits 7-4 from REG_MODEM_CONFIG2 (=_spreadingFactor)
-            // bitRead(config1, 0) ---> take out bits 1 from config1 (=LowDataRateOptimize)
-            // config2 is only for the AgcAutoOn
-            configAgc=config2;
-            theLDRBit=0;
-        }
-        else {
-            config1 = (readRegister(REG_MODEM_CONFIG3));	// Save config1 to check update
-            config2 = (readRegister(REG_MODEM_CONFIG2));
-            // LowDataRateOptimize is in REG_MODEM_CONFIG3
-            // AgcAutoOn is in REG_MODEM_CONFIG3
-            configAgc=config1;
-            theLDRBit=3;
-        }
-
+	config1 = (readRegister(REG_MODEM_CONFIG1));	// Save config1 to check update
+	config2 = (readRegister(REG_MODEM_CONFIG2));	// Save config2 to check update
 	// (config2 >> 4) ---> take out bits 7-4 from REG_MODEM_CONFIG2 (=_spreadingFactor)
 	// bitRead(config1, 0) ---> take out bits 1 from config1 (=LowDataRateOptimize)
 	switch(spr)
-        {
-        case SF_6:	if(		((config2 >> 4) == spr)
-                            && 	(bitRead(configAgc, 2) == 1)
-                            && 	(_header == HEADER_OFF))
-            {
-                state = 0;
-            }
-            break;
-        case SF_7:	if(		((config2 >> 4) == 0x07)
-                            && (bitRead(configAgc, 2) == 1))
-            {
-                state = 0;
-            }
-            break;
-        case SF_8:	if(		((config2 >> 4) == 0x08)
-                            && (bitRead(configAgc, 2) == 1))
-            {
-                state = 0;
-            }
-            break;
-        case SF_9:	if(		((config2 >> 4) == 0x09)
-                            && (bitRead(configAgc, 2) == 1))
-            {
-                state = 0;
-            }
-            break;
-        case SF_10:	if(		((config2 >> 4) == 0x0A)
-                            && (bitRead(configAgc, 2) == 1))
-            {
-                state = 0;
-            }
-            break;
-        case SF_11:	if(		((config2 >> 4) == 0x0B)
-                            && (bitRead(configAgc, 2) == 1)
-                            && (bitRead(config1, theLDRBit) == 1))
-            {
-                state = 0;
-            }
-            break;
-        case SF_12:	if(		((config2 >> 4) == 0x0C)
-                            && (bitRead(configAgc, 2) == 1)
-                            && (bitRead(config1, theLDRBit) == 1))
-            {
-                state = 0;
-            }
-            break;
-        default:	state = 1;
-        }
+	{
+		case SF_6:	if(		((config2 >> 4) == spr)
+						&& 	(bitRead(config2, 2) == 1)
+						&& 	(_header == HEADER_OFF))
+					{
+						state = 0;
+					}
+					break;
+		case SF_7:	if(		((config2 >> 4) == 0x07)
+						 && (bitRead(config2, 2) == 1))
+					{
+						state = 0;
+					}
+					break;
+		case SF_8:	if(		((config2 >> 4) == 0x08)
+						 && (bitRead(config2, 2) == 1))
+					{
+						state = 0;
+					}
+					break;
+		case SF_9:	if(		((config2 >> 4) == 0x09)
+						 && (bitRead(config2, 2) == 1))
+					{
+						state = 0;
+					}
+					break;
+		case SF_10:	if(		((config2 >> 4) == 0x0A)
+						 && (bitRead(config2, 2) == 1))
+					{
+						state = 0;
+					}
+					break;
+		case SF_11:	if(		((config2 >> 4) == 0x0B)
+						 && (bitRead(config2, 2) == 1)
+						 && (bitRead(config1, 0) == 1))
+					{
+						state = 0;
+					}
+					break;
+		case SF_12:	if(		((config2 >> 4) == 0x0C)
+						 && (bitRead(config2, 2) == 1)
+						 && (bitRead(config1, 0) == 1))
+					{
+						state = 0;
+					}
+					break;
+		default:	state = 1;
+	}
   }
 
   writeRegister(REG_OP_MODE, st0);	// Getting back to previous status
@@ -1445,21 +1342,21 @@ uint8_t	SX1272::setSF(uint8_t spr)
   { // Checking available value for _spreadingFactor
 		state = 0;
 		_spreadingFactor = spr;
-		#if (SX1272_debug_mode > 0)
+	//	#if (SX1272_debug_mode > 1)
 		    printf("## Spreading factor ");
 		    printf("%d", _spreadingFactor);
 		    printf(" has been successfully set ##\n");
 		    printf("\n");
-		#endif
+	//	#endif
   }
   else
   {
 	  if( state != 0 )
 	  {
-		  #if (SX1272_debug_mode > 0)
+		//  #if (SX1272_debug_mode > 1)
 		      printf("** There has been an error while setting the spreading factor **");
 		      printf("\n");
-		  #endif
+		//  #endif
 	  }
   }
   return state;
@@ -1524,13 +1421,8 @@ int8_t	SX1272::getBW()
   else
   {
 	  // take out bits 7-6 from REG_MODEM_CONFIG1 indicates _bandwidth
-	  //Modified by Camden Ewell
-	if (_board==SX1272Chip){
-	  config1 = (readRegister(REG_MODEM_CONFIG1)) >> 6;
-	}
-	else { //SX1276
+	  //config1 = (readRegister(REG_MODEM_CONFIG1)) >> 6;
 	  config1 = (readRegister(REG_MODEM_CONFIG1)) >> 4;
-	}
 	  _bandwidth = config1;
 
 	  if( (config1 == _bandwidth) && isBW(_bandwidth) )
@@ -1570,10 +1462,10 @@ int8_t	SX1272::setBW(uint16_t band)
   int8_t state = 2;
   byte config1;
 
-  #if (SX1272_debug_mode > 0)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setBW'\n");
-  #endif
+//  #endif
 
   st0 = readRegister(REG_OP_MODE);	// Save the previous status
 
@@ -1587,56 +1479,35 @@ int8_t	SX1272::setBW(uint16_t band)
   }
   writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);	// LoRa standby mode
   config1 = (readRegister(REG_MODEM_CONFIG1));	// Save config1 to modify only the BW
-  // added by C. Pham for SX1276
-    if (_board==SX1272Chip) {
-		switch(band)
-  		{
-	  case BW_125:  config1 = config1 & 0B00111111;	// clears bits 7 & 6 from REG_MODEM_CONFIG1
+  switch(band)
+  {
+	  config1 = config1 & 0B00001111;	// clears bits 7 - 4 from REG_MODEM_CONFIG1
+	  case BW_125:
+	    //config1 = config1 & 0B00111111;	// clears bits 7 & 6 from REG_MODEM_CONFIG1
+					config1 = config1 | 0B01110000;
 					getSF();
-					if( _spreadingFactor == 11 )
+					if( _spreadingFactor == 11 || _spreadingFactor == 12)
 					{ // LowDataRateOptimize (Mandatory with BW_125 if SF_11)
-						config1 = config1 | 0B00000001;
+						//config1 = config1 | 0B00000001;
+						config1 = config1 | 0B00001000;
 					}
 					if( _spreadingFactor == 12 )
 					{ // LowDataRateOptimize (Mandatory with BW_125 if SF_12)
-						config1 = config1 | 0B00000001;
+						//config1 = config1 | 0B00000001;
+						config1 = config1 | 0B00001000;
 					}
 					break;
-	  case BW_250:  config1 = config1 & 0B01111111;	// clears bit 7 from REG_MODEM_CONFIG1
-					config1 = config1 | 0B01000000;	// sets bit 6 from REG_MODEM_CONFIG1
+	  case BW_250:
+	  	config1 = config1 | 0B10000000;
+	    //config1 = config1 & 0B01111111;	// clears bit 7 from REG_MODEM_CONFIG1
+		//config1 = config1 | 0B01000000;	// sets bit 6 from REG_MODEM_CONFIG1
 					break;
-	  case BW_500:  config1 = config1 & 0B10111111;	//clears bit 6 from REG_MODEM_CONFIG1
-					config1 = config1 | 0B10000000;	//sets bit 7 from REG_MODEM_CONFIG1
-					break;
-  		}
-    }
-    else {
-        // SX1276
-        config1 = config1 & 0B00001111;	// clears bits 7 - 4 from REG_MODEM_CONFIG1
-        switch(band)
-        {
-        case BW_125:
-            // 0111
-            config1 = config1 | 0B01110000;
-            getSF();
-            if( _spreadingFactor == 11 || _spreadingFactor == 12)
-            { // LowDataRateOptimize (Mandatory with BW_125 if SF_11 or SF_12)
-                byte config3=readRegister(REG_MODEM_CONFIG3);
-                config3 = config3 | 0B00001000;
-                writeRegister(REG_MODEM_CONFIG3,config3);
-            }
-            break;
-        case BW_250:
-            // 1000
-            config1 = config1 | 0B10000000;
-            break;
-        case BW_500:
-            // 1001
-            config1 = config1 | 0B10010000;
-            break;
-        }
-    }
-    // end
+	  case BW_500:
+	  	//config1 = config1 & 0B10111111;	//clears bit 6 from REG_MODEM_CONFIG1
+		//config1 = config1 | 0B10000000;	//sets bit 7 from REG_MODEM_CONFIG1
+		config1 = config1 | 0B10010000;
+		break;
+  }
   writeRegister(REG_MODEM_CONFIG1,config1);		// Update config1
 
   delayMicroseconds(100);
@@ -1687,22 +1558,22 @@ int8_t	SX1272::setBW(uint16_t band)
   if( not isBW(band) )
   {
 	  state = 1;
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("** Bandwidth ");
 		  printf("%X", band);
 		  printf(" is not a correct value **\n");
 		  printf("\n");
-	  #endif
+	//  #endif
   }
   else
   {
 	  _bandwidth = band;
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("## Bandwidth ");
 		  printf("%X", band);
 		  printf(" has been successfully set ##\n");
 		  printf("\n");
-	  #endif
+	//  #endif
   }
   writeRegister(REG_OP_MODE, st0);	// Getting back to previous status
   delayMicroseconds(100);
@@ -1804,43 +1675,39 @@ int8_t	SX1272::setCR(uint8_t cod)
   int8_t state = 2;
   byte config1;
 
-  #if (SX1272_debug_mode > 0)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setCR'\n");
-  #endif
+//  #endif
 
   st0 = readRegister(REG_OP_MODE);		// Save the previous status
 
   if( _modem == FSK )
   {
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("## Notice that FSK hasn't Coding Rate parameter, ");
 		  printf("so you are configuring it in LoRa mode ##\n");
-	  #endif
+	//  #endif
 	  state = setLORA();
   }
   writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);		// Set Standby mode to write in registers
 
   config1 = readRegister(REG_MODEM_CONFIG1);	// Save config1 to modify only the CR
-  // Modified by C.EWELL
-  if (_board == SX1272){
-  switch(cod)
-  {
-	 case CR_5: config1 = config1 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG1
-				config1 = config1 | 0B00001000;	// sets bit 3 from REG_MODEM_CONFIG1
-				break;
-	 case CR_6: config1 = config1 & 0B11010111;	// clears bits 5 & 3 from REG_MODEM_CONFIG1
-				config1 = config1 | 0B00010000;	// sets bit 4 from REG_MODEM_CONFIG1
-				break;
-	 case CR_7: config1 = config1 & 0B11011111;	// clears bit 5 from REG_MODEM_CONFIG1
-				config1 = config1 | 0B00011000;	// sets bits 4 & 3 from REG_MODEM_CONFIG1
-			break;
-	 case CR_8: config1 = config1 & 0B11100111;	// clears bits 4 & 3 from REG_MODEM_CONFIG1
-				config1 = config1 | 0B00100000;	// sets bit 5 from REG_MODEM_CONFIG1
-				break;
-  }
-  }
-  else {//sx1276
+//  switch(cod)
+//  {
+//	 case CR_5: config1 = config1 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG1
+//				config1 = config1 | 0B00001000;	// sets bit 3 from REG_MODEM_CONFIG1
+//				break;
+//	 case CR_6: config1 = config1 & 0B11010111;	// clears bits 5 & 3 from REG_MODEM_CONFIG1
+//				config1 = config1 | 0B00010000;	// sets bit 4 from REG_MODEM_CONFIG1
+//				break;
+//	 case CR_7: config1 = config1 & 0B11011111;	// clears bit 5 from REG_MODEM_CONFIG1
+//				config1 = config1 | 0B00011000;	// sets bits 4 & 3 from REG_MODEM_CONFIG1
+//			break;
+//	 case CR_8: config1 = config1 & 0B11100111;	// clears bits 4 & 3 from REG_MODEM_CONFIG1
+//				config1 = config1 | 0B00100000;	// sets bit 5 from REG_MODEM_CONFIG1
+//				break;
+//  }
   config1 = config1 & 0B11110001;	// clears bits 3 - 1 from REG_MODEM_CONFIG1
         switch(cod)
         {
@@ -1857,7 +1724,6 @@ int8_t	SX1272::setCR(uint8_t cod)
             config1 = config1 | 0B00001000;
             break;
 		}
-  }
   writeRegister(REG_MODEM_CONFIG1, config1);		// Update config1
 
   delayMicroseconds(100);
@@ -1891,20 +1757,20 @@ int8_t	SX1272::setCR(uint8_t cod)
   if( isCR(cod) )
   {
 	  _codingRate = cod;
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("## Coding Rate ");
 		  printf("%X", cod);
 		  printf(" has been successfully set ##\n");
 		  printf("\n");
-	  #endif
+	//  #endif
   }
   else
   {
 	  state = 1;
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("** There has been an error while configuring Coding Rate parameter **\n");
 		  printf("\n");
-	  #endif
+	//  #endif
   }
   writeRegister(REG_OP_MODE,st0);	// Getting back to previous status
   delayMicroseconds(100);
@@ -2020,10 +1886,10 @@ int8_t SX1272::setChannel(uint32_t ch)
   uint8_t freq1;
   uint32_t freq;
 
-  #if (SX1272_debug_mode > 0)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setChannel'\n");
-  #endif
+//  #endif
 
   st0 = readRegister(REG_OP_MODE);	// Save the previous status
   if( _modem == LORA )
@@ -2062,12 +1928,12 @@ int8_t SX1272::setChannel(uint32_t ch)
   {
     state = 0;
     _channel = ch;
-    #if (SX1272_debug_mode > 0)
+ //   #if (SX1272_debug_mode > 1)
 		printf("## Frequency channel ");
 		printf("%X", ch);
 		printf(" has been successfully set ##\n");
 		printf("\n");
-	#endif
+//	#endif
   }
   else
   {
@@ -2141,12 +2007,10 @@ int8_t SX1272::setPower(char p)
   int8_t state = 2;
   byte value = 0x00;
 
-  byte RegPaDacReg=(_board==SX1272Chip)?0x5A:0x4D;
-
-  #if (SX1272_debug_mode > 0)
+//  #if (SX1272_debug_mode > 1)
 	  printf("\n");
 	  printf("Starting 'setPower'\n");
-  #endif
+//  #endif
 
   st0 = readRegister(REG_OP_MODE);	  // Save the previous status
   if( _modem == LORA )
@@ -2164,83 +2028,29 @@ int8_t SX1272::setPower(char p)
     // H = high
     // M = max
 
-    case 'M':  value = 0x0F;
+    case 'M':  _power = 0x0F;
                break;
 
-    case 'L':  value = 0x00;
+    case 'L':  _power = 0x00;
                break;
 
-    case 'H':  value = 0x07;
+    case 'H':  _power = 0x07;
                break;
 
     default:   state = -1;
                break;
   }
 
-  //writeRegister(REG_PA_CONFIG, _power);	// Setting output power value
-
-  // 100mA
-    setMaxCurrent(0x0B);
-
-    if (p=='x') {
-        // we set only the PA_BOOST pin
-        // limit to 14dBm
-        value = 0x0C;
-        value = value | 0B10000000;
-        // set RegOcp for OcpOn and OcpTrim
-        // 130mA
-        setMaxCurrent(0x10);
-    }
-
-    if (p=='X') {
-        // normally value = 0x0F;
-        // we set the PA_BOOST pin
-        value = value | 0B10000000;
-        // and then set the high output power config with register REG_PA_DAC
-        writeRegister(RegPaDacReg, 0x87);
-        // set RegOcp for OcpOn and OcpTrim
-        // 150mA
-        setMaxCurrent(0x12);
-    }
-    else {
-        // disable high power output in all other cases
-        writeRegister(RegPaDacReg, 0x84);
-    }
-
-    // added by C. Pham
-    if (_board==SX1272Chip) {
-        // Pout = -1 + _power[3:0] on RFO
-        // Pout = 2 + _power[3:0] on PA_BOOST
-        // so: L=2dBm; H=6dBm, M=14dBm, x=14dBm (PA), X=20dBm(PA+PADAC)
-        writeRegister(REG_PA_CONFIG, value);	// Setting output power value
-    }
-    else {
-        // for the SX1276
-
-        // set MaxPower to 7 -> Pmax=10.8+0.6*MaxPower [dBm] = 15
-        value = value | 0B01110000;
-
-        // then Pout = Pmax-(15-_power[3:0]) if  PaSelect=0 (RFO pin for +14dBm)
-        // so L=3dBm; H=7dBm; M=15dBm (but should be limited to 14dBm by RFO pin)
-
-        // and Pout = 17-(15-_power[3:0]) if  PaSelect=1 (PA_BOOST pin for +14dBm)
-        // so x= 14dBm (PA);
-        // when p=='X' for 20dBm, value is 0x0F and RegPaDacReg=0x87 so 20dBm is enabled
-
-        writeRegister(REG_PA_CONFIG, value);
-    }
-
-    _power=value;
-
+  writeRegister(REG_PA_CONFIG, _power);	// Setting output power value
   value = readRegister(REG_PA_CONFIG);
 
   if( value == _power )
   {
 	  state = 0;
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("## Output power has been successfully set ##\n");
 		  printf("\n");
-	  #endif
+	//  #endif
   }
   else
   {
@@ -2600,10 +2410,10 @@ int8_t SX1272::setNodeAddress(uint8_t addr)
 	byte value;
 	uint8_t state = 2;
 
-	#if (SX1272_debug_mode > 0)
+//	#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setNodeAddress'\n");
-	#endif
+//	#endif
 
 	if( addr > 255 )
 	{
@@ -2638,20 +2448,20 @@ int8_t SX1272::setNodeAddress(uint8_t addr)
 		if( value == _nodeAddress )
 		{
 			state = 0;
-			#if (SX1272_debug_mode > 0)
+		//	#if (SX1272_debug_mode > 1)
 				printf("## Node address ");
 				printf("%d", addr);
 				printf(" has been successfully set ##\n");
 				printf("\n");
-			#endif
+		//	#endif
 		}
 		else
 		{
 			state = 1;
-			#if (SX1272_debug_mode > 0)
+		//	#if (SX1272_debug_mode > 1)
 				printf("** There has been an error while setting address ##\n");
 				printf("\n");
-			#endif
+		//	#endif
 		}
 	}
 	return state;
@@ -3217,10 +3027,10 @@ uint8_t SX1272::receive()
 {
 	  uint8_t state = 2;
 
-	  #if (SX1272_debug_mode > 0)
+	//  #if (SX1272_debug_mode > 1)
 		  printf("\n");
 		  printf("Starting 'receive'\n");
-	  #endif
+	//  #endif
 
 	  // Initializing packet_received struct
 	  memset( &packet_received, 0x00, sizeof(packet_received) );
@@ -3243,19 +3053,19 @@ uint8_t SX1272::receive()
 	  { // LoRa mode
 	  	  state = setPacketLength(MAX_LENGTH);	// With MAX_LENGTH gets all packets with length < MAX_LENGTH
 		  writeRegister(REG_OP_MODE, LORA_RX_MODE);  	  // LORA mode - Rx
-		  #if (SX1272_debug_mode > 0)
+		//  #if (SX1272_debug_mode > 1)
 		  	  printf("## Receiving LoRa mode activated with success ##\n");
 		  	  printf("\n");
-		  #endif
+		//  #endif
 	  }
 	  else
 	  { // FSK mode
 		  state = setPacketLength();
 		  writeRegister(REG_OP_MODE, FSK_RX_MODE);  // FSK mode - Rx
-		  #if (SX1272_debug_mode > 0)
+		//  #if (SX1272_debug_mode > 1)
 		  	  printf("## Receiving FSK mode activated with success ##\n");
 		  	  printf("\n");
-		  #endif
+		//  #endif
 	  }
 	  return state;
 }
