@@ -127,7 +127,7 @@ void
 LoRaFactory::setup(){
 
   //setdebug messages
-  SX1272.setdebug(1);
+  sx1272.setdebug(1);
   // Power ON the module
   e = sx1272.ON();
   

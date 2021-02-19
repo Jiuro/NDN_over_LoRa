@@ -1059,8 +1059,8 @@ public:
 	uint8_t getTemp();
 
 	//added by C.EWELL
-	int8_t	getchip();
-	int8_t	setdebug(uint8_t debug);
+	uint8_t	getchip();
+	uint8_t	setdebug(uint8_t debug);
 	uint8_t _debug;
 
 	/// Variables /////////////////////////////////////////////////////////////
