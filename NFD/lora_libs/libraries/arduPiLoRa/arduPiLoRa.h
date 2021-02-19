@@ -46,7 +46,6 @@
 #define SX1276Chip  1
 
 #define SX1272_debug_mode 1
-#define SX1272_board -1;
 
 #define SX1272_SS 10
 
@@ -1070,7 +1069,7 @@ public:
    	*/
 
 	   // SX1272 or SX1276?
-    //uint8_t _board;
+    uint8_t _board;
     uint8_t _syncWord;
     uint8_t _defaultSyncWord;
     unsigned long _starttime;
