@@ -1823,7 +1823,7 @@ int8_t	SX1272::setCR(uint8_t cod)
 
   config1 = readRegister(REG_MODEM_CONFIG1);	// Save config1 to modify only the CR
   // Modified by C.EWELL
-  if (_board == SX1272){
+  if (_board == SX1272Chip){
   switch(cod)
   {
 	 case CR_5: config1 = config1 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG1
