@@ -27,10 +27,6 @@ After installing Raspbian Lite on the Raspberry Pi, Clang 8 must be installed. [
 
 ### Compiling & Installation
 #### First Time Compilation
-```
-git clone --recursive https://github.com/Jiuro/NDN_over_LoRa.git
-
-```
 
 These build and installation instructions are based off of [this tutorial](https://named-data.net/doc/NFD/current/INSTALL.html) from Named-Data.net. See the tutorial for more in depth instructions.
 
@@ -40,6 +36,12 @@ sudo apt-get install build-essential pkg-config libboost-all-dev \
                      libsqlite3-dev libssl-dev libpcap-dev
 ```
 
+Download the git files:
+```
+git clone --recursive https://github.com/Jiuro/NDN_over_LoRa.git
+```
+
+Navigate to the NDN_over_loRa folder.
 Compile and install the modified library in the `ndn-cxx` folder first from the command line:
 ```
 cd ndn-cxx
@@ -70,7 +72,7 @@ sudo ./waf install
 ```
 Copy the modified NFD configuration file from the root directory to the correct location:
 ```
-cp nfd.conf /usr/local/etc/ndn/nfd.conf
+sudo cp nfd.conf /usr/local/etc/ndn/nfd.conf
 ```
 
 Finally, compile and install ndn-tools. The version provided in the `ndn-tools` folder has not been modified so a new version may be installed from [https://github.com/named-data/ndn-tools](https://github.com/named-data/ndn-tools) by following the instructions posted there. However the `ndn-tools` folder contains a tested working version and can be compiled and installed as follows:
@@ -107,11 +109,17 @@ sudo ./waf install
 
 
 ### Running and testing the software
-Make sure the SX1272 module is connected to the Raspberry Pi. Make sure the Pi is off while connecting the module.
+Make sure the SX1272/SX1276 module is connected to the Raspberry Pi. Make sure the Pi is off while connecting the module.
 
 Test out NFD locally or with a face other than LoRa first.
 Creating a face and connecting to other NFD daemons can be found at [Getting Started with NFD](https://named-data.net/doc/NFD/current/INSTALL.html) & [NDN-tools testing](https://github.com/named-data/ndn-tools).
 
+### Starting and Stopping NFD
+```
+NFD -Start
+
+NFD -Stop
+```
 #### Creating a LoRa Face
 2 or more Raspberry Pis with LoRa modules will need to be set up for this test.
 
@@ -119,10 +127,10 @@ Create a LoRa face on each Pi:
 
 *When creating a face, the format follows the format of: current_node_id-connected_node_id.
 The node_id can be any unique number.
-Ex. connect node 1 to node 2:
+Ex. connect node 1 to node 2 with '... lora://1-2' or do a broadcast with '...lora://1'. This can be set to any number / numbers.
 
 ```
-nfdc face create lora://1-2
+nfdc face create lora://1
 ```
 Look for the face id
 ```
