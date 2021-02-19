@@ -5,7 +5,9 @@ This repository contains the project and work done to add a LoRa networking face
 ### Hardware and Libraries
 This code was modified for and tested on the following hardware and software:
 - Raspberry Pi 3B+
-- Libelium SX1272 LoRa Shield https://www.cooking-hacks.com/sx1272-lora-shield-for-raspberry-pi-900-mhz.html
+- LoRa Module (Either will work, just need 1 per Raspberry Pi)
+  - Libelium SX1272 LoRa Shield https://www.cooking-hacks.com/sx1272-lora-shield-for-raspberry-pi-900-mhz.html
+  - Modtronix SX1276 inAir9B
 
 The libraries used are as follows:
 - [ndn-cxx](https://github.com/named-data/ndn-cxx) - C++ Library that implements NDN programming functions. Used by NFD.
@@ -13,7 +15,7 @@ The libraries used are as follows:
 
 Software:
 - Raspbian 10 Buster
-- Clang 8
+- Clang 9
 - [NFD](https://github.com/named-data/NFD) - NDN forwarding software.
 - [NDN-Tools](https://github.com/named-data/ndn-tools) - Simple command-line tools for testing NFD and NDN applications.
 
@@ -22,7 +24,7 @@ Prior knowledge of Linux, the command line, C++, Python, compilation, and instal
 
 Raspbian and Rasbian Lite were both tested working for this project. Raspbian Lite is recommended for the lighter memory usage.
 
-After installing Raspbian Lite on the Raspberry Pi, Clang 8 must be installed. [Here](https://solarianprogrammer.com/2018/04/22/raspberry-pi-raspbian-install-clang-compile-cpp-17-programs/) is an article about installing Clang 8 on the Pi. Newer versions have not been tested with this project (but will likely work).
+After installing Raspbian Lite on the Raspberry Pi, Clang 9 must be installed. [Here](https://solarianprogrammer.com/2018/04/22/raspberry-pi-raspbian-install-clang-compile-cpp-17-programs/) is an article about installing Clang 8 on the Pi. Newer versions have not been tested with this project (but will likely work).
 
 
 ### Compiling & Installation
@@ -116,9 +118,9 @@ Creating a face and connecting to other NFD daemons can be found at [Getting Sta
 
 ### Starting and Stopping NFD
 ```
-NFD -Start
+sudo NFD -start
 
-NFD -Stop
+sudo NFD -stop
 ```
 #### Creating a LoRa Face
 2 or more Raspberry Pis with LoRa modules will need to be set up for this test.
@@ -145,9 +147,9 @@ Follow the same instructions for the next node with the appropriate ids.
 #### Testing
 Using ndn-tools:
 
-On one Pi, produce a packet:
+On one Pi, produce a packet: (the /ndn is the name of the packet and can be changed to '/___')
 ```
-echo "test" | ndnpoke -x 1000 /ndn
+echo "test" | ndnpoke -x 10000 /ndn
 ```
 -x specifies the freshness of the packet
 
@@ -155,7 +157,7 @@ echo "test" | ndnpoke -x 1000 /ndn
 
 On the second Pi,
 ```
-ndnpeek -pf -l 10000
+ndnpeek -pf -l 10000 /ndn
 ```
 The -l flag specifies the timeout period.
 
@@ -181,6 +183,10 @@ Modified/Added files:
 
 ## Authors, Contributors, & Resources
 [Named Data software and libraries](https://github.com/named-data) were modified by:
+-Camden Ewell
+-Kevin Chau
+-Ye Zhou
+-Jack Fahey
 - Sean Hammond
 - Jake Maschoff
 - Bryan Hatasaka
