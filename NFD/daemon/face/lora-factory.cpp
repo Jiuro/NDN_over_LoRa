@@ -125,6 +125,9 @@ LoRaFactory::doGetChannels() const
 
 void
 LoRaFactory::setup(){
+
+  //setdebug messages
+  SX1272.setdebug(1);
   // Power ON the module
   e = sx1272.ON();
   
@@ -132,7 +135,7 @@ LoRaFactory::setup(){
   e = sx1272.setCR(CR_7);
   e = sx1272.setBW(BW_500);
   e = sx1272.setSF(SF_10);
-  SX1272_debug_mode =1;
+  
 
   // Set header
   e = sx1272.setHeaderON();
