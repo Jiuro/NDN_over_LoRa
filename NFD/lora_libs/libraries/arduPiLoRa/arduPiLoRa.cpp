@@ -87,7 +87,7 @@ uint8_t SX1272::ON()
     if (version == 0x22) {
         // sx1272
         printf("SX1272 detected, starting.\n");
-        _board = SX1272Chip;
+        SX1272_board = SX1272Chip;
     } else {
         // sx1276?
         digitalWrite(SX1272_RST, LOW);
@@ -98,7 +98,7 @@ uint8_t SX1272::ON()
         if (version == 0x12) {
             // sx1276
             printf("SX1276 detected, starting.\n");
-            _board = SX1276Chip;
+            SX1272_board = SX1276Chip;
         } else {
             printf("Unrecognized transceiver.\n");
         }
@@ -129,7 +129,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x6,0xD8);
 	writeRegister(0x7,0x99);
 	writeRegister(0x8,0x99);
-	if (_board==SX1272Chip){
+	if (SX1272_board==SX1272Chip){
 		writeRegister(0x9,0x0);
 	}
 	else {
@@ -154,7 +154,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x1A,0x0);
 	writeRegister(0x1B,0x0);
 	writeRegister(0x1C,0x0);
-	if (_board==SX1272Chip){
+	if (SX1272_board==SX1272Chip){
 		writeRegister(0x1D,0x4A);
 	}
 	else { //SX1276
@@ -171,7 +171,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x24,0x0);
 	writeRegister(0x25,0x0);
 	//Modified by Camden
-	if (_board==SX1272Chip){
+	if (SX1272_board==SX1272Chip){
 		writeRegister(0x26,0x0);
 	}
 	else { //SX1276
@@ -205,7 +205,7 @@ uint8_t SX1272::ON()
 	writeRegister(0x40,0x0);
 	writeRegister(0x41,0x0);
 	//Modified by Camden
-	if (_board==SX1272Chip){
+	if (SX1272_board==SX1272Chip){
 		writeRegister(0x42,0x22);
 	}
 	#endif
@@ -489,7 +489,7 @@ uint8_t SX1272::getMode()
   }
   value = readRegister(REG_MODEM_CONFIG1);
   //Modified by Camden Ewell
-	if (_board==SX1272Chip){
+	if (SX1272_board==SX1272Chip){
 		_bandwidth = (value >> 6);   			// Storing 2 MSB from REG_MODEM_CONFIG1 (=_bandwidth)
   		_codingRate = (value >> 3) & 0x07;  		// Storing third, forth and fifth bits from
 	}
@@ -1287,7 +1287,7 @@ uint8_t	SX1272::setSF(uint8_t spr)
 					// modified by C. Pham
             if( _bandwidth == BW_125)
             { // LowDataRateOptimize (Mandatory with SF_11 if BW_125)
-                if (_board==SX1272Chip)
+                if (SX1272_board==SX1272Chip)
                     config1 = config1 | 0B00000001;
                 else {
                     byte config3=readRegister(REG_MODEM_CONFIG3);
@@ -1301,7 +1301,7 @@ uint8_t	SX1272::setSF(uint8_t spr)
             if( _bandwidth == BW_125)
             { // LowDataRateOptimize (Mandatory with SF_12 if BW_125)
                 // modified by C. Pham
-                if (_board==SX1272Chip)
+                if (SX1272_board==SX1272Chip)
                     config1 = config1 | 0B00000001;
                 else {
                     byte config3=readRegister(REG_MODEM_CONFIG3);
@@ -1336,7 +1336,7 @@ uint8_t	SX1272::setSF(uint8_t spr)
  
     // sets bit 2-0 (AgcAutoOn and SymbTimout) for any SF value
     // added by C. Pham
-        if (_board==SX1272Chip) {
+        if (SX1272_board==SX1272Chip) {
             // comment by C. Pham
             // bit 9:8 of SymbTimeout are then 11
             // single_chan_pkt_fwd uses 00 and then 00001000
@@ -1366,7 +1366,7 @@ uint8_t	SX1272::setSF(uint8_t spr)
         byte configAgc;
         uint8_t theLDRBit;
 
-        if (_board==SX1272Chip) {
+        if (SX1272_board==SX1272Chip) {
             config1 = (readRegister(REG_MODEM_CONFIG1));	// Save config1 to check update
             config2 = (readRegister(REG_MODEM_CONFIG2));	// Save config2 to check update
             // comment by C. Pham
@@ -1525,7 +1525,7 @@ int8_t	SX1272::getBW()
   {
 	  // take out bits 7-6 from REG_MODEM_CONFIG1 indicates _bandwidth
 	  //Modified by Camden Ewell
-	if (_board==SX1272Chip){
+	if (SX1272_board==SX1272Chip){
 	  config1 = (readRegister(REG_MODEM_CONFIG1)) >> 6;
 	}
 	else { //SX1276
@@ -1588,7 +1588,7 @@ int8_t	SX1272::setBW(uint16_t band)
   writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);	// LoRa standby mode
   config1 = (readRegister(REG_MODEM_CONFIG1));	// Save config1 to modify only the BW
   // added by C. Pham for SX1276
-    if (_board==SX1272Chip) {
+    if (SX1272_board==SX1272Chip) {
 		switch(band)
   		{
 	  case BW_125:  config1 = config1 & 0B00111111;	// clears bits 7 & 6 from REG_MODEM_CONFIG1
@@ -1823,7 +1823,7 @@ int8_t	SX1272::setCR(uint8_t cod)
 
   config1 = readRegister(REG_MODEM_CONFIG1);	// Save config1 to modify only the CR
   // Modified by C.EWELL
-  if (_board == SX1272Chip){
+  if (SX1272_board == SX1272Chip){
   switch(cod)
   {
 	 case CR_5: config1 = config1 & 0B11001111;	// clears bits 5 & 4 from REG_MODEM_CONFIG1
@@ -2141,7 +2141,7 @@ int8_t SX1272::setPower(char p)
   int8_t state = 2;
   byte value = 0x00;
 
-  byte RegPaDacReg=(_board==SX1272Chip)?0x5A:0x4D;
+  byte RegPaDacReg=(SX1272_board==SX1272Chip)?0x5A:0x4D;
 
   #if (SX1272_debug_mode > 0)
 	  printf("\n");
@@ -2208,7 +2208,7 @@ int8_t SX1272::setPower(char p)
     }
 
     // added by C. Pham
-    if (_board==SX1272Chip) {
+    if (SX1272_board==SX1272Chip) {
         // Pout = -1 + _power[3:0] on RFO
         // Pout = 2 + _power[3:0] on PA_BOOST
         // so: L=2dBm; H=6dBm, M=14dBm, x=14dBm (PA), X=20dBm(PA+PADAC)

@@ -156,7 +156,7 @@ LoRaFactory::setup(){
 
   // Print a success message
   // Modified by C.EWELL
-  if (sx1272_board == SX1272){
+  if (SX1272_debug_mode == SX1272Chip){
     NFD_LOG_INFO("SX1272 successfully configured");
     delay(1000);
   }
