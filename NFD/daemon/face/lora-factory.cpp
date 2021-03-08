@@ -126,48 +126,50 @@ LoRaFactory::doGetChannels() const
 void
 LoRaFactory::setup(){
 
-  // //setdebug messages
-  // sx1272.setdebug(2);
-  // // Power ON the module
-  // e = sx1272.ON();
+  //setdebug messages
+  sx1272.setdebug(2);
+  // Power ON the module
+  e = sx1272.ON();
   
-  // //Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
-  // e = sx1272.setCR(CR_7);
-  // e = sx1272.setBW(BW_500);
-  // e = sx1272.setSF(SF_10);
+  //Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
+  e = sx1272.setCR(CR_7);
+  e = sx1272.setBW(BW_500);
+  e = sx1272.setSF(SF_10);
   
 
-  // // Set header
-  // e = sx1272.setHeaderON();
+  // Set header
+  e = sx1272.setHeaderON();
 
-  // // Select frequency channel
-  // e = sx1272.setChannel(CH_12_900);
+  // Select frequency channel
+  e = sx1272.setChannel(CH_12_900);
 
-  // // Set CRC
-  // e = sx1272.setCRC_ON();
+  // Set CRC
+  e = sx1272.setCRC_ON();
 
-  // // Select output power (Max, High or Low)
-  // e = sx1272.setPower('M');
+  // Select output power (Max, High or Low)
+  e = sx1272.setPower('M');
 
-  // // Set the node address
-  // e = sx1272.setNodeAddress(3);
+  // Set the node address
+  e = sx1272.setNodeAddress(3);
 
-  // // Set the LoRa into receive mode by default
-   //e = sx1272.receive();
-  // if (e)
-  //   NFD_LOG_INFO("Unable to enter receive mode");
+  // Set the LoRa into receive mode by default
+   e = sx1272.receive();
+  if (e)
+    NFD_LOG_INFO("Unable to enter receive mode");
 
-  sx1272.setupLORA();
+  //sx1272.setupLORA();
 
   // Print a success message
   // Modified by C.EWELL
   e = sx1272.getchip();
   if (e == SX1272Chip){
-    NFD_LOG_INFO("SX1272 successfully configured");
+    printf("SX1272 successfully configured");
+    //NFD_LOG_INFO("SX1272 successfully configured");
     delay(1000);
   }
   else {
-    NFD_LOG_INFO("SX1276 successfully configured");
+    printf("SX1276 successfully configured");
+    //NFD_LOG_INFO("SX1276 successfully configured");
     delay(1000);
   }
 }
