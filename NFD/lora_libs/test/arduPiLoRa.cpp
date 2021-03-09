@@ -400,7 +400,7 @@ printf("Warning: FSK has not been tested on SX1276!\n");
 		printf("Starting 'setFSK'\n");
 	#endif
 
-	if(	_modem = LORA )
+	if(	_modem == LORA )
 	{
 		writeRegister(REG_OP_MODE, LORA_STANDBY_MODE);
 		writeRegister(REG_OP_MODE, LORA_SLEEP_MODE);
@@ -5508,7 +5508,10 @@ uint8_t	SX1272::setdebug(uint8_t debug)
 
 uint8_t SX1272::setupLORA()
 {
+	int e =0;
+	bool error=false;
 	int choice;
+	int menu_choice;
 	bool menu = false;
 	while(menu==false){
 		
@@ -5517,17 +5520,97 @@ uint8_t SX1272::setupLORA()
 		std::cout<<"2 - Enter Values\n";
 		std::cout<<"Enter your choice for the LoRa setup: ";
 		std::cin>> choice;
+		std::cin.clear();
 
 		switch (choice){
 			case 1:
 				//setdebug messages
   				setdebug(2);
  				 // Power ON the module
-  				ON();
+  				e = ON();
+				  if (e != 0){error=true;}
   
   				//Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
-  				setCR(CR_7);
-  				setBW(BW_500);
+  				e = setCR(CR_7);
+				  if (e != 0){error=true;}
+  				e = setBW(BW_500);
+				  if (e != 0){error=true;}
+  				e = setSF(SF_10);
+				  if (e != 0){error=true;}
+  
+
+  				// Set header
+  				e = setHeaderON();
+				  if (e != 0){error=true;}
+
+  				// Select frequency channel
+  				e = setChannel(CH_12_900);
+				  if (e != 0){error=true;}
+
+  				// Set CRC
+  				e = setCRC_ON();
+				  if (e != 0){error=true;}
+
+  				// Select output power (Max, High or Low)
+  				e = setPower('M');
+				  if (e != 0){error=true;}
+
+  				// Set the node address
+  				e = setNodeAddress(3);
+				  if (e != 0){error=true;}
+
+				e = _board;
+  				if (e == SX1272Chip && error==false){
+    				printf("SX1272 successfully configured");
+    				delay(1000);
+  				}
+  				else if(error==false){
+    				printf("SX1276 successfully configured");
+    				delay(1000);
+  				}
+				  else {
+					printf("Error during configuration");
+    				delay(1000);
+				  }
+				  menu = true;
+
+			break;
+
+			case 2://Enter values for LoRa
+				std::cout<<"Debug Messages: \n";
+				std::cout<<"0 - OFF \n";
+				std::cout<<"1 - Light \n";
+				std::cout<<"2 - Medium \n";
+				std::cout<<"Please pick a value: ";
+				std::cin>> menu_choice;
+				std::cin.clear();
+				switch (menu_choice){
+					case 0: setdebug(0); break;
+					case 1: setdebug(1); break;
+					case 2: setdebug(2); break;
+					default: setdebug(1); break;
+				}
+
+				e = ON();
+				  if (e != 0){error=true;}
+
+				std::cout<<"Set Coding Rate: \n";
+				std::cout<<"5 - CR_5 \n";
+				std::cout<<"6 - CR_6 \n";
+				std::cout<<"7 - CR_7 \n";
+				std::cout<<"8 - CR_8 \n";
+				std::cout<<"Please pick a value: ";
+				std::cin>> menu_choice;
+				std::cin.clear();
+				switch (menu_choice){
+					case 5: setCR(CR_5); break;
+					case 6: setCR(CR_6); break;
+					case 7: setCR(CR_7); break;
+					case 8: setCR(CR_8); break;
+					default: setCR(CR_7); break;
+				}
+
+				setBW(BW_500);
   				setSF(SF_10);
   
 
@@ -5545,16 +5628,7 @@ uint8_t SX1272::setupLORA()
 
   				// Set the node address
   				setNodeAddress(3);
-
-  				// Set the LoRa into receive mode by default
-  				receive();
-				  menu = true;
-
-			break;
-
-			case 2:
-				
-				//menu = true;
+				menu = true;
 			break;
 			default:
 				// std::cout<<"\n";
@@ -5565,7 +5639,7 @@ uint8_t SX1272::setupLORA()
 				std::cout<<"\n";
 				std::cout<<"Invalid choice. \n";
 				std::cout<<"Resorting to default setup: \n\n";
-  				setdebug(2);
+  				setdebug(0);
  				 // Power ON the module
   				ON();
   
@@ -5590,8 +5664,8 @@ uint8_t SX1272::setupLORA()
   				// Set the node address
   				setNodeAddress(3);
 
-  				// Set the LoRa into receive mode by default
-  				receive();
+				  setdebug(2);
+
 				  menu = true;
 			break;
 			

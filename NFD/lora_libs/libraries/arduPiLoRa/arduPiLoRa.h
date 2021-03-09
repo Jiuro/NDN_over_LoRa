@@ -1061,6 +1061,7 @@ public:
 	//added by C.EWELL
 	uint8_t	getchip();
 	uint8_t	setdebug(uint8_t debug);
+	uint8_t success(int success);
 	uint8_t setupLORA();
 	uint8_t _debug;
 
