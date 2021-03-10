@@ -5531,14 +5531,14 @@ uint8_t	SX1272::setdebug(uint8_t debug)
 uint8_t SX1272::success(int success)//print a success message if the lora configured correctly
 {
 	switch(success){
-		case 1: printf("SX1272 detected, starting.\n"); break;
-		case 2: printf("SX1276 detected, starting.\n"); break;
+		case 1: printf("SX1272 successfully configured.\n"); break;
+		case 2: printf("SX1276 successfully configured.\n"); break;
 		default: printf("Error: LoRa unsuccessfully configured. Please stop the program!\n");
 	}
 	return 0;
 }
 
-uint8_t SX1272::setupLORA(int setting)
+uint8_t SX1272::setupLORA()
 {
 	// reading a text file
 
@@ -5565,8 +5565,8 @@ uint8_t SX1272::setupLORA(int setting)
         getline(myfile, debug_value);
         cin.clear();
 		//change string to int
-		stringstream val(debug_value);
-		val >> dbv;
+		stringstream val1(debug_value);
+		val1 >> dbv;
 		setdebug(dbv); //set debug value
 
 		//turn on LoRa module
@@ -5575,33 +5575,35 @@ uint8_t SX1272::setupLORA(int setting)
 		//set Coding rate value
         getline(myfile, codingRate_value);
 		cin.clear(); 
-		stringstream val(codingRate_value);
-		val >> crv;
+		stringstream val2(codingRate_value);
+		val2 >> crv;
 
 		switch (crv){ //set coding rate
 			case 5: setCR(CR_5); break;
 			case 6: setCR(CR_6); break;
 			case 7: setCR(CR_7); break;
 			case 8: setCR(CR_8); break;
+			default: setCR(CR_7); break;
 		}
 		
 		//set Bandwidth value
 		getline(myfile, bandwidth_value);
 		cin.clear(); 
-		stringstream val(bandwidth_value);//change string to int
-		val >> bwv; //change string to int
+		stringstream val3(bandwidth_value);//change string to int
+		val3 >> bwv; //change string to int
 
 		switch (bwv){ //set Bandwidth
 			case 125: setBW(BW_125); break;
 			case 250: setBW(BW_250); break;
 			case 500: setBW(BW_500); break;
+			default: setBW(BW_500); break;
 		}
 
 		//set Spreading Factor value
 		getline(myfile, spreadingfactor_value);
 		cin.clear(); 
-		stringstream val(spreadingfactor_value);//change string to int
-		val >> sfv; //change string to int
+		stringstream val4(spreadingfactor_value);//change string to int
+		val4 >> sfv; //change string to int
 
 		switch (sfv){ //set Spreading Factor
 			case 6: setSF(SF_6); break;
@@ -5611,6 +5613,7 @@ uint8_t SX1272::setupLORA(int setting)
 			case 10: setSF(SF_10); break;
 			case 11: setSF(SF_11); break;
 			case 12: setSF(SF_12); break;
+			default: setSF(SF_10); break;
 		}
 
   		// Set header
@@ -5619,8 +5622,8 @@ uint8_t SX1272::setupLORA(int setting)
   		// Select frequency channel
 		  getline(myfile, frequency_value);
 		cin.clear(); 
-		stringstream val(frequency_value);//change string to int
-		val >> fv; //change string to int
+		stringstream val5(frequency_value);//change string to int
+		val5 >> fv; //change string to int
 
 		switch (fv){ //set Frequency
 			case 1: setChannel(CH_10_868); break;
@@ -5644,6 +5647,7 @@ uint8_t SX1272::setupLORA(int setting)
 			case 19: setChannel(CH_10_900); break;
 			case 20: setChannel(CH_11_900); break;
 			case 21: setChannel(CH_12_900); break;
+			default: setChannel(CH_12_900); break;
 		}
 
   		// Set CRC
@@ -5652,8 +5656,8 @@ uint8_t SX1272::setupLORA(int setting)
   		// Select output power (Max, High or Low) power_value
 		getline(myfile, power_value);
 		cin.clear(); 
-		stringstream val(power_value);//change string to int
-		val >> pv; //change string to int
+		stringstream val6(power_value);//change string to int
+		val6 >> pv; //change string to int
 
 		switch (pv){ //set Power Value
 			case 1: setPower('L'); break;
@@ -5661,14 +5665,52 @@ uint8_t SX1272::setupLORA(int setting)
 			case 3: setPower('M'); break;
 			case 4: setPower('x'); break;
 			case 5: setPower('X'); break;
+			default: setpower('H'); break;
 		}
 
   		// Set the node address
-  		setNodeAddress(3);   //Does this do anything? The register is wrong                                                                                      
+		getline(myfile, node_value);
+		cin.clear(); 
+		stringstream val7(node_value);//change string to int
+		val7 >> nv; //change string to int
+  		setNodeAddress(nv);   //Does this do anything? The register is wrong                                                                                      
 
   	}
 
   else cout << "Error: Unable to open file. Stop the program!";
+  myfile.close();
+
+  return 0;
+}
+
+uint8_t SX1272::getLoraSetup()
+{
+	cout <<"\n";
+	string getV;
+	int gv = 0; //which line are we on
+	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+  	if (myfile.is_open())
+  	{
+		  //get debug value
+        while (getline(myfile, getV))
+		{
+			switch (gv){
+				case 0: cout << "The debug setting is: " << getV << endl; break;
+				case 1: cout << "The Coding Rate setting is: " << getV << endl; break;
+				case 2: cout << "The Bandwidth setting is: " << getV << endl; break;
+				case 3: cout << "The Spreading Factor setting is: " << getV << endl; break;
+				case 4: cout << "The channel and frequency settings are: " << getV << endl; break;
+				case 5: cout << "The Power setting is: " << getV << endl; break;
+				case 6: cout << "The Node Address is: " << getV << endl; break;
+			}
+			gv++;
+			
+		}
+
+	}
+
+  else cout << "Error: Unable to open file. Stop the program!";
+  myfile.close();
 
   return 0;
 }
