@@ -50,6 +50,7 @@
 #define SX1272_SS 10
 
 #define LORA_RESET_PIN 1
+#define LORA_SX1276_RESET_PIN 9
 
 //! MACROS //
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)  // read a bit

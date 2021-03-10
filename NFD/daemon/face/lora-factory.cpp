@@ -127,7 +127,7 @@ void
 LoRaFactory::setup(){
 
   sx1272.setupLORA();
-  
+
   // //setdebug messages
   // sx1272.setdebug(2);
   // // Power ON the module
@@ -169,7 +169,7 @@ LoRaFactory::setup(){
     //NFD_LOG_INFO("SX1272 successfully configured");
     delay(1000);
   }
-  else if (e==SX1272Chip){
+  else if (e==SX1276Chip){
     sx1272.success(2);
     delay(1000);
   }
