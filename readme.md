@@ -81,7 +81,7 @@ sudo ./waf install
 
 The -j2 flag is used to limit the number of simultaneous compilations to 2 jobs. This is done to reduce memory usage. Successful compilation has been achieved with 3 jobs, but has also needed to be limited to 1 job depending on what other software is running on the Pi at the time of compilation.
 
-### LoRa Configuration
+#### LoRa Configuration
 The following commands are to compile the lora configuration commands. The LoRa takes its setting values from a text file, and these commands will alter the text file or read it.
 ```
 cd NFD/lora_libs/setup/
@@ -95,7 +95,7 @@ You can now run the commands from anywhere via the command console.
 getlora
 setlora
 ```
-### Testing GPIO (Optional)
+#### Testing GPIO (Optional)
 The following compiles the test GPIO. DO NOT have anything wired to the Pi while this is being done!
 ```
 cd test
