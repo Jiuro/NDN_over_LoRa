@@ -96,7 +96,7 @@ getlora
 setlora
 ```
 #### Testing GPIO (Optional)
-The following compiles the test GPIO. DO NOT have anything wired to the Pi while this is being done!
+The following compiles the test GPIO. 
 ```
 cd test
 clang++ -pthread *.cpp -o testGPIO
@@ -106,6 +106,7 @@ You can move it to the bin directory if you want to be able to run the command f
 sudo cp -r testGPIO /usr/local/bin
 ```
 Run the command with either of the following: (the first one requires you to be in the test folder and the second requires the executable to be in the /bin folder.
+DO NOT have anything wired to the Pi while this is being done!
 ```
 sudo ./testGPIO
 testGPIO
