@@ -62,7 +62,6 @@ uint8_t SX1272::ON()
 	}
 
 if (_debug > 0){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'ON'\n");
 }//#endif
 
@@ -835,7 +834,6 @@ int8_t	SX1272::setHeaderON()
   byte config1;
 
   if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'setHeaderON'\n");
   }//#endif
 
@@ -1029,7 +1027,6 @@ uint8_t	SX1272::setCRC_ON()
   byte config1;
 
   if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'setCRC_ON'\n");
   }//#endif
 
@@ -1242,7 +1239,6 @@ uint8_t	SX1272::setSF(uint8_t spr)
   byte config2;
 
   if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'setSF'\n");
   }//#endif
 
@@ -1569,7 +1565,6 @@ int8_t	SX1272::setBW(uint16_t band)
   byte config1;
 
   if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'setBW'\n");
   }//#endif
 
@@ -1803,7 +1798,6 @@ int8_t	SX1272::setCR(uint8_t cod)
   byte config1;
 
   if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'setCR'\n");
   }//#endif
 
@@ -2019,7 +2013,6 @@ int8_t SX1272::setChannel(uint32_t ch)
   uint32_t freq;
 
   if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'setChannel'\n");
   }//#endif
 
@@ -2142,7 +2135,6 @@ int8_t SX1272::setPower(char p)
   byte RegPaDacReg=(_board==SX1272Chip)?0x5A:0x4D;
 
   if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-	  printf("\n");
 	  printf("Starting 'setPower'\n");
   }//#endif
 
@@ -2599,7 +2591,6 @@ int8_t SX1272::setNodeAddress(uint8_t addr)
 	uint8_t state = 2;
 
 	if (_debug > 1){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-		printf("\n");
 		printf("Starting 'setNodeAddress'\n");
 	}//#endif
 
@@ -3216,7 +3207,6 @@ uint8_t SX1272::receive()
 	  uint8_t state = 2;
 
 	  if (_debug > 0){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-		  printf("\n");
 		  printf("Starting 'receive'\n");
 	  }//#endif
 
@@ -3683,7 +3673,6 @@ int8_t SX1272::getPacket(uint16_t wait)
 	boolean p_received = false;
 
 	if (_debug > 0){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.Ewell
-		printf("\n");
 		printf("Starting 'getPacket'\n");
 	}//#endif
 
@@ -5540,8 +5529,9 @@ uint8_t SX1272::success(int success)//print a success message if the lora config
 
 uint8_t SX1272::setupLORA()
 {
-	// reading a text file
 
+	// reading a text file
+	string change_value;
   	string debug_value;
 	string codingRate_value;
 	string bandwidth_value;
@@ -5561,6 +5551,10 @@ uint8_t SX1272::setupLORA()
   	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
   	if (myfile.is_open())
   	{
+		_check_for_change = false;
+		getline(myfile, change_value);
+
+        cin.clear();
 		  //set debug value
         getline(myfile, debug_value);
         cin.clear();
@@ -5665,7 +5659,7 @@ uint8_t SX1272::setupLORA()
 			case 3: setPower('M'); break;
 			case 4: setPower('x'); break;
 			case 5: setPower('X'); break;
-			default: setpower('H'); break;
+			default: setPower('H'); break;
 		}
 
   		// Set the node address
@@ -5675,215 +5669,108 @@ uint8_t SX1272::setupLORA()
 		val7 >> nv; //change string to int
   		setNodeAddress(nv);   //Does this do anything? The register is wrong                                                                                      
 
+	myfile.close();// closes the program if open.
   	}
 
   else cout << "Error: Unable to open file. Stop the program!";
-  myfile.close();
 
   return 0;
 }
 
 uint8_t SX1272::getLoraSetup()
 {
-	cout <<"\n";
 	string getV;
+	string change_v;
+	string debug_v;
+	string codingRate_v;
+	string bandwidth_v;
+	string spreadingfactor_v;
+	string frequency_v;
+	string power_v;
+	string node_v;
+
+	int vc=0; //value for change
+	bool need_change=true; //lora defaults as needing to change
 	int gv = 0; //which line are we on
 	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
   	if (myfile.is_open())
   	{
-		  //get debug value
-        while (getline(myfile, getV))
+		while(getline(myfile, getV) && need_change==true)
 		{
-			switch (gv){
-				case 0: cout << "The debug setting is: " << getV << endl; break;
-				case 1: cout << "The Coding Rate setting is: " << getV << endl; break;
-				case 2: cout << "The Bandwidth setting is: " << getV << endl; break;
-				case 3: cout << "The Spreading Factor setting is: " << getV << endl; break;
-				case 4: cout << "The channel and frequency settings are: " << getV << endl; break;
-				case 5: cout << "The Power setting is: " << getV << endl; break;
-				case 6: cout << "The Node Address is: " << getV << endl; break;
+			change_v = getV; 
+			stringstream val_change(change_v);//change string to int
+			val_change >> vc; //change string to int
+			switch (gv)
+			{
+				case 0:
+		  			//get change value
+        
+					switch (vc)
+					{
+						case 0: need_change = false; break;
+						case 1: 
+							need_change = true;
+						break;
+						default: need_change = false; break;
+					}
+				break;
+
+				//continue to get values to rewrite the file after change.
+				case 1: debug_v = getV; break;
+				case 2: codingRate_v = getV; break;
+				case 3: bandwidth_v = getV; break;
+				case 4: spreadingfactor_v = getV; break;
+				case 5: frequency_v = getV; break;
+				case 6: power_v = getV; break;
+				case 7: node_v = getV; break;
 			}
 			gv++;
-			
+		}
+		myfile.close();
+		delay(100);
+		if (need_change==false){return 0;}
+		else {
+			if (_check_for_change == true){ // this is required so the LoRa isn't setup twice at the start if the file has been changed prior to start.
+				setupLORA(); // sets the new values in the LoRa
+				receive();
+  				if (_board == SX1272Chip){
+    				sx1272.success(1);
+    				delay(1000);
+  				}
+  				else if (_board==SX1276Chip){
+    				sx1272.success(2);
+    				delay(1000);
+  				}
+  				else {
+    				sx1272.success(3);
+    				delay(1000);
+  				}
+			}
+			_check_for_change = true;
+
+			fstream newfile;
+   			newfile.open("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
+			if(newfile.is_open())     //checking whether the file is open
+   			{
+				newfile<<"0\n";
+				newfile<<debug_v<<"\n";
+				newfile<<codingRate_v<<"\n";
+				newfile<<bandwidth_v<<"\n";
+				newfile<<spreadingfactor_v<<"\n";
+				newfile<<frequency_v<<"\n";
+				newfile<<power_v<<"\n";
+				newfile<<node_v<<"\n";
+				newfile.close();
+			}
+			else {printf("Error writing new file!");}
 		}
 
 	}
-
-  else cout << "Error: Unable to open file. Stop the program!";
-  myfile.close();
+  	else cout << "Error: Unable to open file. Stop the program!";
 
   return 0;
 }
-// uint8_t SX1272::setupLORA()
-// {
-// 	int e =0;
-// 	bool error=false;
-// 	int choice;
-// 	int menu_choice;
-// 	bool menu = false;
-// 	while(menu==false){
-		
-// 		std::cout<<"________________________________\n";
-// 		std::cout<<"1 - Default Setup\n";
-// 		std::cout<<"2 - Enter Values\n";
-// 		std::cout<<"Enter your choice for the LoRa setup: ";
-// 		std::cin>> choice;
-// 		std::cin.clear();
 
-// 		switch (choice){
-// 			case 1:
-// 				//setdebug messages
-//   				setdebug(2);
-//  				 // Power ON the module
-//   				e = ON();
-// 				  if (e != 0){error=true;}
-  
-//   				//Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
-//   				e = setCR(CR_7);
-// 				  if (e != 0){error=true;}
-//   				e = setBW(BW_500);
-// 				  if (e != 0){error=true;}
-//   				e = setSF(SF_10);
-// 				  if (e != 0){error=true;}
-  
-
-//   				// Set header
-//   				e = setHeaderON();
-// 				  if (e != 0){error=true;}
-
-//   				// Select frequency channel
-//   				e = setChannel(CH_12_900);
-// 				  if (e != 0){error=true;}
-
-//   				// Set CRC
-//   				e = setCRC_ON();
-// 				  if (e != 0){error=true;}
-
-//   				// Select output power (Max, High or Low)
-//   				e = setPower('M');
-// 				  if (e != 0){error=true;}
-
-//   				// Set the node address
-//   				e = setNodeAddress(3);
-// 				  if (e != 0){error=true;}
-
-// 				e = _board;
-//   				if (e == SX1272Chip && error==false){
-//     				printf("SX1272 successfully configured");
-//     				delay(1000);
-//   				}
-//   				else if(error==false){
-//     				printf("SX1276 successfully configured");
-//     				delay(1000);
-//   				}
-// 				  else {
-// 					printf("Error during configuration");
-//     				delay(1000);
-// 				  }
-// 				  menu = true;
-
-// 			break;
-
-// 			case 2://Enter values for LoRa
-// 				std::cout<<"Debug Messages: \n";
-// 				std::cout<<"0 - OFF \n";
-// 				std::cout<<"1 - Light \n";
-// 				std::cout<<"2 - Medium \n";
-// 				std::cout<<"Please pick a value: ";
-// 				std::cin>> menu_choice;
-// 				std::cin.clear();
-// 				switch (menu_choice){
-// 					case 0: setdebug(0); break;
-// 					case 1: setdebug(1); break;
-// 					case 2: setdebug(2); break;
-// 					default: setdebug(1); break;
-// 				}
-
-// 				e = ON();
-// 				  if (e != 0){error=true;}
-
-// 				std::cout<<"Set Coding Rate: \n";
-// 				std::cout<<"5 - CR_5 \n";
-// 				std::cout<<"6 - CR_6 \n";
-// 				std::cout<<"7 - CR_7 \n";
-// 				std::cout<<"8 - CR_8 \n";
-// 				std::cout<<"Please pick a value: ";
-// 				std::cin>> menu_choice;
-// 				std::cin.clear();
-// 				switch (menu_choice){
-// 					case 5: setCR(CR_5); break;
-// 					case 6: setCR(CR_6); break;
-// 					case 7: setCR(CR_7); break;
-// 					case 8: setCR(CR_8); break;
-// 					default: setCR(CR_7); break;
-// 				}
-
-// 				setBW(BW_500);
-//   				setSF(SF_10);
-  
-
-//   				// Set header
-//   				setHeaderON();
-
-//   				// Select frequency channel
-//   				setChannel(CH_12_900);
-
-//   				// Set CRC
-//   				setCRC_ON();
-
-//   				// Select output power (Max, High or Low)
-//   				setPower('M');
-
-//   				// Set the node address
-//   				setNodeAddress(3);
-// 				menu = true;
-// 			break;
-// 			default:
-// 				// std::cout<<"\n";
-// 				// std::cout<<"Invalid choice. \n";
-// 				// std::cout<<"Enter your choice for the LoRa setup: ";
-// 				// std::cin>> choice;
-// 				//setdebug messages
-// 				std::cout<<"\n";
-// 				std::cout<<"Invalid choice. \n";
-// 				std::cout<<"Resorting to default setup: \n\n";
-//   				setdebug(0);
-//  				 // Power ON the module
-//   				ON();
-  
-//   				//Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
-//   				setCR(CR_7);
-//   				setBW(BW_500);
-//   				setSF(SF_10);
-  
-
-//   				// Set header
-//   				setHeaderON();
-
-//   				// Select frequency channel
-//   				setChannel(CH_12_900);
-
-//   				// Set CRC
-//   				setCRC_ON();
-
-//   				// Select output power (Max, High or Low)
-//   				setPower('M');
-
-//   				// Set the node address
-//   				setNodeAddress(3);
-
-// 				  setdebug(2);
-
-// 				  menu = true;
-// 			break;
-			
-// 		}
-
-
-// 	}
-	
-// 	return 0;
-// }
 
 
 SX1272 sx1272 = SX1272();

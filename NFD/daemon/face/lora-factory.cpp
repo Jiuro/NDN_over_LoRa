@@ -188,7 +188,12 @@ void *LoRaFactory::transmit_and_recieve()
   NFD_LOG_INFO("Starting Lo-Ra thread");
   try
   {
+    
+
     while(true){
+
+      sx1272.getLoraSetup();//checks to see if the LoRa needs to update;
+      
         // sendBufferQueue shared resouce
         pthread_mutex_lock(&threadLock);
 

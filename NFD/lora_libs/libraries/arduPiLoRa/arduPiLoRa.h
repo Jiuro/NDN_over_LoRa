@@ -1064,7 +1064,9 @@ public:
 	uint8_t	setdebug(uint8_t debug);
 	uint8_t success(int success);
 	uint8_t setupLORA();
+	uint8_t getLoraSetup();
 	uint8_t _debug;
+	bool _check_for_change;
 
 	/// Variables /////////////////////////////////////////////////////////////
 
