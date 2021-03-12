@@ -60,15 +60,6 @@ Next, compile and install the modified library in the `NFD` folder:
 cd NFD
 sudo chmod u+x ./waf
 CXX=clang++ ./waf configure
-```
-At this point if it says that something is missing (websocket app) then follow the instructions to add it, the instructions will be something like:
-```
-mkdir -p websocketpp
-curl -L https://github.com/cawka/websocketpp/archive/0.8.1-hotfix.tar.gz > websocketpp.tar.gz
-tar xf websocketpp.tar.gz -C websocketpp/ --strip 1
-```
-Then rerun the config command above and continue:
-```
 ./waf -j2
 sudo ./waf install
 ```
@@ -77,7 +68,7 @@ Copy the modified NFD configuration file from the root directory to the correct 
 sudo cp nfd.conf /usr/local/etc/ndn/nfd.conf
 ```
 
-Finally, compile and install ndn-tools. The version provided in the `ndn-tools` folder has not been modified so a new version may be installed from [https://github.com/named-data/ndn-tools](https://github.com/named-data/ndn-tools) by following the instructions posted there. However the `ndn-tools` folder contains a tested working version and can be compiled and installed as follows:
+Compile and install ndn-tools. The version provided in the `ndn-tools` folder has not been modified so a new version may be installed from [https://github.com/named-data/ndn-tools](https://github.com/named-data/ndn-tools) by following the instructions posted there. However the `ndn-tools` folder contains a tested working version and can be compiled and installed as follows:
 ```
 cd ndn-tools
 sudo chmod u+x ./waf
@@ -90,6 +81,35 @@ sudo ./waf install
 
 The -j2 flag is used to limit the number of simultaneous compilations to 2 jobs. This is done to reduce memory usage. Successful compilation has been achieved with 3 jobs, but has also needed to be limited to 1 job depending on what other software is running on the Pi at the time of compilation.
 
+### LoRa Configuration
+The following commands are to compile the lora configuration commands. The LoRa takes its setting values from a text file, and these commands will alter the text file or read it.
+```
+cd NFD/lora_libs/setup/
+clang++ getLoraSetup.cpp -o getlora
+clang++ setuplora.cpp -o setlora
+sudo cp -r getlora /usr/local/bin
+sudo cp -r setlora /usr/local/bin
+```
+You can now run the commands from anywhere via the command console.
+```
+getlora
+setlora
+```
+### Testing GPIO (Optional)
+The following compiles the test GPIO. DO NOT have anything wired to the Pi while this is being done!
+```
+cd test
+clang++ -pthread *.cpp -o testGPIO
+```
+You can move it to the bin directory if you want to be able to run the command from anywhere:
+```
+sudo cp -r testGPIO /usr/local/bin
+```
+Run the command with either of the following: (the first one requires you to be in the test folder and the second requires the executable to be in the /bin folder.
+```
+sudo ./testGPIO
+testGPIO
+```
 
 #### Susbsequent Compilations
 Once everything has been compiled for the first time and tested working, if any changes are made the compilation and installation will go much faster and requires fewer steps.
@@ -116,7 +136,7 @@ Make sure the SX1272/SX1276 module is connected to the Raspberry Pi. Make sure t
 Test out NFD locally or with a face other than LoRa first.
 Creating a face and connecting to other NFD daemons can be found at [Getting Started with NFD](https://named-data.net/doc/NFD/current/INSTALL.html) & [NDN-tools testing](https://github.com/named-data/ndn-tools).
 
-### Starting and Stopping NFD
+#### Starting and Stopping NFD
 ```
 sudo NFD -start
 
